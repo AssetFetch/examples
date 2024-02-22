@@ -4,83 +4,60 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import os,re,pathlib,glob
 
-from .templates import meta,query,datablock
-from . import access
-from . import error
-
-# Read environment variables
-
-ASSET_DIRECTORY = os.environ['AF_ASSET_DIRECTORY']
-if not ASSET_DIRECTORY:
-	raise Exception("Missing model directory environment variable.")
-
-API_URL = os.environ['AF_API_URL']
-if not API_URL:
-	raise Exception("Missing host url environment variable.")
-
-SQLITE_PATH = os.environ['AF_DB_PATH']
-if not SQLITE_PATH:
-	raise Exception("Missing SQLITE_PATH variable.")
+from . import meta,queries,datablocks,access,error,config
 
 # Define endpoints
 
 app = FastAPI()
 
-"""
-Handle exceptions
-"""
-
+# Handle exceptions
 app.add_exception_handler(error.AssetFetchException,error.assetfetch_exception_handler)
 
-"""
-The static directory contains all the files that are hosted for download.
-"""
-app.mount("/static", StaticFiles(directory=ASSET_DIRECTORY), name="assets")
 
-"""
-This is the implementation of the initialization endpoint.
-This endpoint is the first point of contact between a client and this provider.
-"""
+#The static directory contains all the files that are hosted for download.
+app.mount("/static", StaticFiles(directory=config.ASSET_DIRECTORY), name="assets")
+
+# Init Endpoint
 @app.get("/")
 def endpoint_initialization():
 
 	return {
-		"meta":meta.AfMetaData(),
+		"meta":meta.MetaData(),
 		"data":{
 			# This datablock tells the client where to go to get the asset list
-			"asset_list_query":query.AfVariableQuery(uri=f"{API_URL}/asset_list",method=query.AfHttpMethod.GET,parameters=[]),
+			"asset_list_query":queries.VariableQuery(uri=f"{config.API_URL}/asset_list",method=queries.HttpMethod.GET,parameters=[]),
 			# This datablock tells the client a display name and a description for this provider
-			"text":datablock.Text("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
-			"headers": datablock.Headers([
-				datablock.Headers_Header("access-token",True,True,"Access Token","","")
+			"text":datablocks.Text("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
+			"headers": datablocks.Headers([
+				datablocks.Headers_Header("access-token",True,True,"Access Token","","")
 			]),
-			"unlock_initialization":datablock.UnlockInitialization("Credits",True,"",query.AfFixedQuery("",query.AfHttpMethod.GET,{})),
-			"web_references":datablock.WebReferences([
-				datablock.WebReferences_WebReference(
+			"unlock_initialization":datablocks.UnlockInitialization("Credits",True,"",queries.FixedQuery("",queries.HttpMethod.GET,{})),
+			"web_references":datablocks.WebReferences([
+				datablocks.WebReferences_WebReference(
 					"AssetFetch Website",
 					"https://assetfetch.org"
 				)
 			]),
-			"branding":datablock.Branding("abcdef","","",""),
-			"license":datablock.License("","")
+			"branding":datablocks.Branding("abcdef","","",""),
+			"license":datablocks.License("","")
 		},
 	}
 
 @app.get("/asset_list")
 def endpoint_asset_list(access_token: Annotated[str | None , Header()] = None):
 
-	# Test for access token
-	if(not access.verify_token(access_token=access_token)):
-		raise error.AssetFetchException("asset_list","Could not validate access token.",status.HTTP_401_UNAUTHORIZED)
-
+	# Verify token
+	verification = access.resolve_access_token(access_token=access_token,endpoint_kind="asset_list")
+		
 	# Parse the asset directory
 	assets = []
-	root_dir = pathlib.Path(ASSET_DIRECTORY)
-	asset_dirs = root_dir.glob("*/*")
+	root_dir = pathlib.Path(config.ASSET_DIRECTORY)
+	asset_dirs = root_dir.glob("*")
 	asset_names : List[str] = []
 
+
 	# Get the paths of all OBJ files
-	obj_files = list(glob.glob(pathname="*.obj",root_dir=ASSET_DIRECTORY))
+	obj_files = list(glob.glob(pathname="*.obj",root_dir=config.ASSET_DIRECTORY))
 	assets = []
 
 	for obj_path in obj_files:
@@ -93,13 +70,13 @@ def endpoint_asset_list(access_token: Annotated[str | None , Header()] = None):
 			"data":{
 				# This is the query that the client has to call to find out how to actually download the asset
 				"implementations_query":{
-					"uri": f"{API_URL}/implementation_list/{asset_name}",
+					"uri": f"{config.API_URL}/implementation_list/{asset_name}",
 					"method":"GET",
 					"parameters":{}
 				},
 				"preview_image_thumbnail":{
 					"uris":{
-						256: f"{API_URL}/static/{asset_name}.png"
+						256: f"{config.API_URL}/static/{asset_name}.png"
 					}
 				},
 				"text":{
@@ -129,7 +106,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 
 	# Search the right file for the asset name
 
-	asset_file = pathlib.Path(f"{ASSET_DIRECTORY}/{asset_name}.obj")
+	asset_file = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}.obj")
 
 	if asset_file.exists():
 		output = {
@@ -155,7 +132,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 							"data":{
 								"fetch.file":{
 									"component_query":{
-										"uri": f"{API_URL}/static/{asset_file.name}",
+										"uri": f"{config.API_URL}/static/{asset_file.name}",
 										"method": "GET",
 										"payload": None
 									},

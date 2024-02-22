@@ -1,19 +1,19 @@
 from enum import Enum
 from typing import Dict, List
 
-class AfHttpMethod(Enum):
+class HttpMethod(Enum):
 	GET = "get"
 	POST = "post"
 
-class AfHttpParameterType:
+class HttpParameterType:
 	text = "text"
 	boolean = "boolean"
 	hidden = "hidden"
 	select = "select"
 	multiselect = "multiselect"
 
-class AfHttpParameter:
-    def __init__(self, type : AfHttpParameterType, name : str, title : str, default : str = "", mandatory : bool = False, choices : List[str]=[], delimiter : str=','):
+class HttpParameter:
+    def __init__(self, type : HttpParameterType, name : str, title : str, default : str = "", mandatory : bool = False, choices : List[str]=[], delimiter : str=','):
         self.type = type
         self.name = name
         self.title = title
@@ -22,14 +22,14 @@ class AfHttpParameter:
         self.choices = choices
         self.delimiter = delimiter
 
-class AfFixedQuery:
-	def __init__(self,uri : str, method : AfHttpMethod, payload : Dict[str,str] ) -> None:
+class FixedQuery:
+	def __init__(self,uri : str, method : HttpMethod, payload : Dict[str,str] ) -> None:
 		self.uri : str = uri
-		self.method : AfHttpMethod = method
+		self.method : HttpMethod = method
 		self.payload : Dict[str,str] = payload
 
-class AfVariableQuery:
-	def __init__(self,uri : str, method : AfHttpMethod, parameters : List[AfHttpParameter]) -> None:
+class VariableQuery:
+	def __init__(self,uri : str, method : HttpMethod, parameters : List[HttpParameter]) -> None:
 		self.uri = uri
 		self.method = method
 		self.parameters = parameters

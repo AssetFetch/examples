@@ -1,23 +1,26 @@
 
 from enum import Enum
-from fastapi import HTTPException
+import random
+import string
+from typing import List
+from fastapi import status
+from hashlib import sha512
+from . import error,users
 
-class AssetFetchActionType(Enum):
-	LIST_ASSETS = 1
+def sha512_from_string(string:str) -> str:
+	return sha512(string.encode('utf-8')).hexdigest()
 
-class AssetFetchAction:
-	def __init__(self,action_type : AssetFetchActionType,subject : any) -> None:
-		self.action_type = action_type
-		self.subject = subject
+class AssetFetchVerificationResult:
+	def __init__(self,success:bool,user:users.AssetFetchUser) -> None:
+		self.success = success
+		self.user = user
 
-def verify_token(access_token : str|None,action : AssetFetchAction = None) -> bool:
-
-	# If there is no action, we always allow it
-	if action is None:
-		return True
-	
-	# WIP, currently we only check if a token is present at all
+def resolve_access_token(access_token : str|None,endpoint_kind : str) -> AssetFetchVerificationResult:
 	if access_token is None:
-		return False
+		raise error.AssetFetchException(endpoint_kind=endpoint_kind,message="No access token set.",status_code=status.HTTP_401_UNAUTHORIZED)
 	else:
-		return True
+		token_hash = sha512_from_string(access_token)
+		for user in users.DEMO_USERS:
+			if( token_hash == user.token_sha512 ):
+				return AssetFetchVerificationResult(success=True,user=user,message="OK")
+		raise error.AssetFetchException(endpoint_kind=endpoint_kind,message="Could not find a user for this access token.",status_code=status.HTTP_401_UNAUTHORIZED)
