@@ -1,14 +1,14 @@
 version: '3'
 services:
-  python-fastapi-minimal:
+  python-fastapi-advanced:
     image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
-    container_name: assetfetch_fastapi_minimal
+    container_name: assetfetch_fastapi_advanced
     ports:
       - "8000:8000"
     environment:
-      - AF_MODEL_DIRECTORY=/mnt/models
+      - AF_MODEL_DIRECTORY=/mnt/assets
       - AF_API_URL=http://localhost:8000
     volumes:
       - ./app:/app
-      - ./models:/mnt/models
+      - ./assets:/mnt/assets
     command: "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"

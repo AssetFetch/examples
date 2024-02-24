@@ -21,27 +21,28 @@ app.mount("/static", StaticFiles(directory=config.ASSET_DIRECTORY), name="assets
 @app.get("/")
 def endpoint_initialization():
 
-	return {
-		"meta":meta.MetaData(),
-		"data":{
-			# This datablock tells the client where to go to get the asset list
-			"asset_list_query":queries.VariableQuery(uri=f"{config.API_URL}/asset_list",method=queries.HttpMethod.GET,parameters=[]),
-			# This datablock tells the client a display name and a description for this provider
-			"text":datablocks.Text("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
-			"headers": datablocks.Headers([
-				datablocks.Headers_Header("access-token",True,True,"Access Token","","")
+	output = {}
+	output['meta'] = meta.MetaData(meta.EndpointKind.initialization)
+	output['data'] = datablocks.DatablockContainer(
+		[
+			datablocks.AssetListQueryBlock(uri=f"{config.API_URL}/asset_list",method=queries.HttpMethod.GET,parameters=[]),
+			datablocks.TextBlock("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
+			datablocks.HeadersBlock([
+				datablocks.SingularHeader("access-token",True,True,"Access Token","","")
 			]),
-			"unlock_initialization":datablocks.UnlockInitialization("Credits",True,"",queries.FixedQuery("",queries.HttpMethod.GET,{})),
-			"web_references":datablocks.WebReferences([
-				datablocks.WebReferences_WebReference(
+			datablocks.UnlockInitializationBlock("Credits",True,"",queries.FixedQuery("",queries.HttpMethod.GET,{})),
+			datablocks.WebReferencesBlock([
+				datablocks.SingularWebReference(
 					"AssetFetch Website",
 					"https://assetfetch.org"
 				)
 			]),
-			"branding":datablocks.Branding("abcdef","","",""),
-			"license":datablocks.License("","")
-		},
-	}
+			datablocks.BrandingBlock("abcdef","","",""),
+			datablocks.LicenseBlock("","")
+		]
+	)
+
+	return output
 
 @app.get("/asset_list")
 def endpoint_asset_list(access_token: Annotated[str | None , Header()] = None):

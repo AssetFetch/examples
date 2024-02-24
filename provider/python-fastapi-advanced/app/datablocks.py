@@ -1,6 +1,7 @@
 
 
-from typing import List
+from enum import Enum
+from typing import Dict, List
 from . import query
 from abc import ABC,abstractmethod
 
@@ -13,10 +14,21 @@ class Datablock:
 	def block_name(self):
 		pass
 
+class DatablockContainer(Dict[str,Datablock]):
+	def __init__(self,blocks : List[Datablock] | None) -> None:
+		for b in blocks:
+			self.set_block(b)
+
+	def set_block(self,block:Datablock):
+		self[block.block_name] = block
+
 ### DATABLOCKS
 
 class ImplementationListQueryBlock(query.VariableQuery,Datablock):
 	block_name = "implementation_list_query"
+
+class AssetListQueryBlock(query.VariableQuery,Datablock):
+	block_name = "asset_list_query"
 
 class TextBlock(Datablock):
 	block_name = "text"
@@ -59,8 +71,27 @@ class BrandingBlock(Datablock):
 		self.logo_wide_uri = logo_wide_uri
 		self.banner_uri = banner_uri
 
-class LicenseBlock:
+class LicenseBlock(Datablock):
 	block_name = "license"
 	def __init__(self,license_spdx : str,license_uri:str) -> None:
 		self.license_spdx = license_spdx
 		self.license_uri = license_uri
+
+class SingularAuthor:
+	def __init__(self,name:str,uri:str,role:str) -> None:
+		self.name=name
+		self.uri = uri
+		self.role = role
+
+class AuthorsBlock(Datablock,List[SingularAuthor]):
+	block_name = "authors"
+
+class BehaviorStyle(Enum):
+	ACTIVE="active"
+	PASSIVE="passive"
+
+class BehaviorBlock(Datablock):
+	block_name="behavior"
+	def __init__(self,style:BehaviorStyle) -> None:
+		super().__init__()
+		self.style=style
