@@ -1,7 +1,22 @@
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Dict, List
 
-class HttpMethod(Enum):
+from fastapi.encoders import jsonable_encoder
+
+# Templates for the meta field
+class EndpointKind(StrEnum):
+	initialization = "initialization"
+	asset_list = "asset_list"
+	implementation_list = "implementation_list"
+
+class MetaField:
+	def __init__(self,kind : EndpointKind,message : str = "OK",version : str = "0.2.0-dev") -> None:
+		self.kind :EndpointKind = kind
+		self.message :str = message
+		self.version :str = version
+
+# HTTP query related templates
+class HttpMethod(StrEnum):
 	GET = "get"
 	POST = "post"
 
@@ -33,4 +48,3 @@ class VariableQuery:
 		self.uri = uri
 		self.method = method
 		self.parameters = parameters
-

@@ -1,0 +1,15 @@
+
+newmtl apple_low_1k
+Ns 50
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.1 0.1 0.1
+Ke 0 0 0
+Ni 1.45
+d 1.000000
+illum 2
+map_Kd apple_low_1k_color.jpg
+map_bump -bm 1 apple_low_1k_normal_gl.jpg
+map_Ka apple_low_1k_normal_ao.jpg
+
+
