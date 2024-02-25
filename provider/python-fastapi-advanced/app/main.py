@@ -65,7 +65,7 @@ def endpoint_asset_list(request : Request):
 	
 
 @app.get("/implementation_list/{asset_name}")
-def endpoint_implementation_list(asset_name:str,request:Request,response:Response,resolution:int,lod:str):
+def endpoint_implementation_list(asset_name:str,request:Request,response:Response,resolution:int = None,lod:str = None,format:str = None):
 
 	# Verify token
 	access_token = request.headers.get('access-token')
@@ -92,15 +92,25 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 	if about_asset['kind'] == "model":
 
+		# Check for required parameters.
+		# The models in this demo only come with JPG textures, which is why the texture_format parameter is not required here.
+
+		if resolution == None:
+			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'resolution' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
+		
+		if lod == None:
+			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'lod' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
+
 		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}/lod.{lod}_tex.{resolution}k/")
 		print(f"Asset path is {asset_path}")
-
 		
 		obj_files = list(asset_path.glob("*.obj"))
 		if len(list(obj_files)) > 0:
 
 			# Implementation 1: OBJ with MTL
-			obj_mtl_implementation = implementations.AssetImplementation("OBJ+MTL",[],[])
+			obj_mtl_implementation = implementations.AssetImplementation("OBJ+MTL",components=[],data=[
+				datablocks.TextBlock("OBJ with MTL file")
+			])
 
 			# Add OBJs to implementation
 			for obj_path in obj_files:
@@ -137,7 +147,9 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 			# Implementation 2: OBJ with loose PBR maps
 			
-			obj_loose_material_implementation = implementations.AssetImplementation("OBJ+LOOSE_MAPS",[],[])
+			obj_loose_material_implementation = implementations.AssetImplementation(name="OBJ+LOOSE_MAPS",components=[],data=[
+				datablocks.TextBlock("OBJ with PBR maps")
+			])
 
 			# Add OBJs to implementation, but without MTLs
 			for obj_path in obj_files:
@@ -179,12 +191,14 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 			implementation_list.append(obj_loose_material_implementation)
 			
-		# Option 3: USD files
+		# Implementation 3: USD files
 		
 		usd_files = list(asset_path.glob("*.usd?"))
 		if len(usd_files) > 0:
 			
-			usd_implementation = implementations.AssetImplementation("USD",[],[])
+			usd_implementation = implementations.AssetImplementation("USD",components=[],data=[
+				datablocks.TextBlock("OpenUSD")
+			])
 
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
@@ -206,7 +220,111 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				usd_implementation.components.append(map_component)
 
 			implementation_list.append(usd_implementation)
+
+	if about_asset['kind'] == "material":
+		if resolution == None:
+			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'resolution' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
+		
+		if format == None:
+			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'format' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
+		
+		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}/format.{format}_res.{resolution}k/")
+		print(f"Asset path is {asset_path}")
+
+		map_files = list(asset_path.glob("*.[jp][pn][g]"))
+		if len(map_files) > 0:
+
+			# Implementation 1: Loose material
 			
+			mat_loose_material_implementation = implementations.AssetImplementation(name="LOOSE",components=[],data=[
+				datablocks.TextBlock("Set of PBR maps.")
+			])
+
+			for map_path in map_files:
+				map_path = pathlib.Path(map_path)
+
+				# Determine which PBR map this file is
+				map = None
+				if "_color" in map_path.name:
+					map=datablocks.LooseMaterialMapName.albedo
+					colorspace = datablocks.LooseMaterialColorSpace.SRGB
+				if "_normal_gl" in map_path.name:
+					map=datablocks.LooseMaterialMapName.normal_plus_y
+					colorspace = datablocks.LooseMaterialColorSpace.LINEAR
+				if "_normal_dx" in map_path.name:
+					map=datablocks.LooseMaterialMapName.normal_minus_y
+					colorspace = datablocks.LooseMaterialColorSpace.LINEAR
+				if "_ao" in map_path.name:
+					map=datablocks.LooseMaterialMapName.ambient_occlusion
+					colorspace = datablocks.LooseMaterialColorSpace.LINEAR
+				if "_roughness" in map_path.name:
+					map=datablocks.LooseMaterialMapName.roughness
+					colorspace = datablocks.LooseMaterialColorSpace.LINEAR
+				if "_height" in map_path.name:
+					map=datablocks.LooseMaterialMapName.height
+					colorspace = datablocks.LooseMaterialColorSpace.LINEAR
+
+				if map:
+					map_component = implementations.AssetImplementationComponent(map_path.name,[
+						datablocks.fetch_file_block_from_path(map_path,map_path.name),
+						datablocks.LooseMaterialDefineBlock(asset_name,map,colorspace),
+						datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+					])
+					mat_loose_material_implementation.components.append(map_component)
+
+			implementation_list.append(mat_loose_material_implementation)
+
+		# Implementation 2: USD
+		usd_files = list(asset_path.glob("*.usd?"))
+		if len(usd_files) > 0:
+			
+			usd_implementation = implementations.AssetImplementation("USD",components=[],data=[
+				datablocks.TextBlock("OpenUSD")
+			])
+
+			for usd_path in usd_files:
+				usd_path = pathlib.Path(usd_path)
+				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
+					datablocks.fetch_file_block_from_path(usd_path,usd_path.name),
+					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+				])
+				usd_implementation.components.append(usd_component)
+
+			for map_path in map_files:
+				map_path = pathlib.Path(map_path)
+
+				map_component = implementations.AssetImplementationComponent(map_path.name,[
+					datablocks.fetch_file_block_from_path(map_path,map_path.name),
+					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+				])
+				usd_implementation.components.append(map_component)
+
+			implementation_list.append(usd_implementation)
+
+		mtlx_files = list(asset_path.glob("*.mtlx"))
+		if len(mtlx_files) > 0:
+			mtlx_implementation = implementations.AssetImplementation("MTLX",components=[],data=[
+				datablocks.TextBlock("MTLX Material")
+			])
+
+			for mtlx_path in mtlx_files:
+				mtlx_path = pathlib.Path(mtlx_path)
+				mtlx_component = implementations.AssetImplementationComponent(mtlx_path.name,[
+					datablocks.fetch_file_block_from_path(mtlx_path,mtlx_path.name),
+					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+				])
+				mtlx_implementation.components.append(mtlx_component)
+
+			for map_path in map_files:
+				map_path = pathlib.Path(map_path)
+
+				map_component = implementations.AssetImplementationComponent(map_path.name,[
+					datablocks.fetch_file_block_from_path(map_path,map_path.name),
+					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+				])
+				mtlx_implementation.components.append(map_component)
+
+			implementation_list.append(mtlx_implementation)
 
 	return {
 		"meta":templates.MetaField(templates.EndpointKind.implementation_list),

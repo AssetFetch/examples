@@ -1,0 +1,102 @@
+#usda 1.0
+(
+    customLayerData = {
+        string author = "ambientCG (ambientCG.com)"
+        string copyright = "CC0 1.0 Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/)"
+        string generator = "ambientCG USD Script v4 (build_usdc_pbr_material.py)"
+        string[] keywords = ["herringbone", "orange", "paving", "stones"]
+        string title = "Paving Stones 114"
+        string type = "Material"
+        string url = "https://ambientcg.com/a/PavingStones114"
+    }
+    defaultPrim = "paving_stones_jpg_1k"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Material "paving_stones_jpg_1k"
+{
+    token outputs:surface.connect = </paving_stones_jpg_1k/PBRShader.outputs:surface>
+
+    def Shader "TextureCoordinateReader"
+    {
+        uniform token info:id = "UsdPrimvarReader_float2"
+        token inputs:varname = "st"
+        float2 outputs:result
+    }
+
+    def Shader "PBRShader"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor.connect = </paving_stones_jpg_1k/diffuseColor.outputs:rgb>
+        float inputs:displacement.connect = </paving_stones_jpg_1k/displacement.outputs:r>
+        normal3f inputs:normal.connect = </paving_stones_jpg_1k/normal.outputs:rgb>
+        float inputs:occlusion.connect = </paving_stones_jpg_1k/occlusion.outputs:r>
+        float inputs:roughness.connect = </paving_stones_jpg_1k/roughness.outputs:r>
+        int inputs:useSpecularWorkflow = 0
+        token outputs:surface
+    }
+
+    def Shader "occlusion"
+    {
+        uniform token info:id = "UsdUVTexture"
+        float4 inputs:fallback = (1, 1, 1, 1)
+        asset inputs:file = @paving_stones_jpg_1k_ao.jpg@
+        token inputs:sourceColorSpace = "raw"
+        token inputs:st.connect = </paving_stones_jpg_1k/TextureCoordinateReader.outputs:result>
+        token inputs:wrapS = "repeat"
+        token inputs:wrapT = "repeat"
+        float3 outputs:r
+    }
+
+    def Shader "diffuseColor"
+    {
+        uniform token info:id = "UsdUVTexture"
+        float4 inputs:fallback = (0.75, 0.75, 0.75, 1)
+        asset inputs:file = @paving_stones_jpg_1k_color.jpg@
+        token inputs:sourceColorSpace = "sRGB"
+        token inputs:st.connect = </paving_stones_jpg_1k/TextureCoordinateReader.outputs:result>
+        token inputs:wrapS = "repeat"
+        token inputs:wrapT = "repeat"
+        float3 outputs:rgb
+    }
+
+    def Shader "displacement"
+    {
+        uniform token info:id = "UsdUVTexture"
+        float4 inputs:fallback = (0, 0, 0, 1)
+        asset inputs:file = @paving_stones_jpg_1k_height.jpg@
+        token inputs:sourceColorSpace = "raw"
+        token inputs:st.connect = </paving_stones_jpg_1k/TextureCoordinateReader.outputs:result>
+        token inputs:wrapS = "repeat"
+        token inputs:wrapT = "repeat"
+        float3 outputs:r
+    }
+
+    def Shader "normal"
+    {
+        uniform token info:id = "UsdUVTexture"
+        float4 inputs:bias = (-1, -1, -1, 0)
+        float4 inputs:fallback = (0, 0, 1, 1)
+        asset inputs:file = @paving_stones_jpg_1k_normal_gl.jpg@
+        float4 inputs:scale = (2, 2, 2, 1)
+        token inputs:sourceColorSpace = "raw"
+        token inputs:st.connect = </paving_stones_jpg_1k/TextureCoordinateReader.outputs:result>
+        token inputs:wrapS = "repeat"
+        token inputs:wrapT = "repeat"
+        float3 outputs:rgb
+    }
+
+    def Shader "roughness"
+    {
+        uniform token info:id = "UsdUVTexture"
+        float4 inputs:fallback = (0.5, 0.5, 0.5, 1)
+        asset inputs:file = @paving_stones_jpg_1k_roughness.jpg@
+        token inputs:sourceColorSpace = "raw"
+        token inputs:st.connect = </paving_stones_jpg_1k/TextureCoordinateReader.outputs:result>
+        token inputs:wrapS = "repeat"
+        token inputs:wrapT = "repeat"
+        float3 outputs:r
+    }
+}
+

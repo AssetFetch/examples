@@ -35,7 +35,7 @@ class AssetListQueryBlock(templates.VariableQuery,Datablock):
 
 class TextBlock(Datablock):
 	block_name = "text"
-	def __init__(self,title : str, description : str) -> None:
+	def __init__(self,title : str, description : str = None) -> None:
 		self.title = title
 		self.description = description
 
@@ -155,6 +155,7 @@ class LooseMaterialColorSpace(StrEnum):
 	LINEAR = "linear"
 
 class LooseMaterialDefineBlock(Datablock):
+	block_name="loose_material_define"
 	def __init__(self,material_name:str,map:LooseMaterialMapName,colorspace:LooseMaterialColorSpace) -> None:
 		super().__init__()
 		self.material_name :str = material_name
@@ -162,6 +163,7 @@ class LooseMaterialDefineBlock(Datablock):
 		self.colorspace : LooseMaterialColorSpace = colorspace
 
 class LooseMaterialApplyBlock(Datablock):
+	block_name="loose_material_apply"
 	def __init__(self,material_name:str,apply_selectively_to:str|None) -> None:
 		super().__init__()
 		self.material_name : str = material_name

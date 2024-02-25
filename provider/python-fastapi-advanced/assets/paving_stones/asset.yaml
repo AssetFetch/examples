@@ -2,9 +2,9 @@
 # but the data here will be used by the code in this example to generate the actual spec-compliant JSON.
 # In a more robust and production-ready example this data would more likely come from an actual database.
 
-title: Red Apple
-description: A simple model of a red apple.
+title: Paving Stones
+description: Photoscanned paving stones.
 license_spdx: CC0-1.0
 author: ambientCG
 author_uri: https://ambientcg.com
-kind: model
+kind: material
