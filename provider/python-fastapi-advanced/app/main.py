@@ -92,12 +92,12 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}/lod.{lod}_tex.{resolution}k/")
 		print(f"Asset path is {asset_path}")
 
-		"""
-		obj_files = asset_path.glob("*.obj")
+		
+		obj_files = list(asset_path.glob("*.obj"))
 		if len(list(obj_files)) > 0:
 
 			# Implementation 1: OBJ with MTL
-			obj_mtl_implementation = implementations.AssetImplementation("OBJ+MTL")
+			obj_mtl_implementation = implementations.AssetImplementation("OBJ+MTL",[],[])
 
 			# Add OBJs to implementation
 			for obj_path in obj_files:
@@ -110,7 +110,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				obj_mtl_implementation.components.append(obj_component)
 
 			# Add MTLs to implementation
-			mtl_files = asset_path.glob("*.mtl")
+			mtl_files = list(asset_path.glob("*.mtl"))
 			for mtl_path in mtl_files:
 				mtl_path = pathlib.Path(mtl_path)
 				mtl_component = implementations.AssetImplementationComponent(mtl_path.name,[
@@ -120,7 +120,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				obj_mtl_implementation.components.append(mtl_component)
 
 			# Add JPGs, but without any explicit references (those are handled by the mtl files)
-			jpg_files = asset_path.glob("*.jpg")
+			jpg_files = list(asset_path.glob("*.jpg"))
 			for jpg_path in jpg_files:
 				jpg_path = pathlib.Path(jpg_path)
 
@@ -133,8 +133,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 			implementation_list.append(obj_mtl_implementation)
 
 			# Implementation 2: OBJ with loose PBR maps
-
-			obj_loose_material_implementation = implementations.AssetImplementation("OBJ+LOOSE_MAPS")
+			
+			obj_loose_material_implementation = implementations.AssetImplementation("OBJ+LOOSE_MAPS",[],[])
 
 			# Add OBJs to implementation, but without MTLs
 			for obj_path in obj_files:
@@ -147,7 +147,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				])
 				obj_loose_material_implementation.components.append(obj_component)
 
-			jpg_files = asset_path.glob("*.jpg")
+			jpg_files = list(asset_path.glob("*.jpg"))
 			for jpg_path in jpg_files:
 				jpg_path = pathlib.Path(jpg_path)
 				
@@ -173,19 +173,18 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 						datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
 					])
 					obj_loose_material_implementation.components.append(map_component)
-			implementation_list.append(obj_loose_material_implementation)
-			"""
 
+			implementation_list.append(obj_loose_material_implementation)
+			
 		# Option 3: USD files
 		
 		usd_files = list(asset_path.glob("*.usd?"))
 		if len(usd_files) > 0:
 			
-			usd_implementation = implementations.AssetImplementation("USD")
+			usd_implementation = implementations.AssetImplementation("USD",[],[])
 
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
-				print(f"Handling USD file {usd_path.name}")
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
 					datablocks.fetch_file_block_from_path(usd_path,usd_path.name),
 					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
@@ -203,12 +202,11 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				])
 				usd_implementation.components.append(map_component)
 
-
 			implementation_list.append(usd_implementation)
-		else:
-			print("Did not find any USD files.")
+			
+
 	return {
-		"meta":templates.MetaField(templates.EndpointKind.asset_list),
-		"data":datablocks.DataField(),
+		"meta":templates.MetaField(templates.EndpointKind.implementation_list),
+		"data":datablocks.DataField([]),
 		"implementations":implementation_list
 	}

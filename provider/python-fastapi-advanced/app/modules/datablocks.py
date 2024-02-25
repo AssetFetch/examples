@@ -18,7 +18,7 @@ class Datablock:
 		pass
 
 class DataField(Dict[str,Datablock]):
-	def __init__(self,blocks : List[Datablock] = []) -> None:
+	def __init__(self,blocks : List[Datablock]) -> None:
 		for b in blocks:
 			self.set_block(b)
 
