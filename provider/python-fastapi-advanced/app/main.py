@@ -17,7 +17,7 @@ app.mount("/static", StaticFiles(directory=config.ASSET_DIRECTORY), name="assets
 # Init Endpoint
 @app.get("/")
 def endpoint_initialization():
-	return jsonable_encoder({
+	return {
 		"meta": templates.MetaField(templates.EndpointKind.initialization),
 		"data": datablocks.DataField(
 			[
@@ -37,7 +37,7 @@ def endpoint_initialization():
 				datablocks.LicenseBlock("","")
 			]
 		)
-	})
+	}
 
 # Asset List Endpoint
 @app.get("/asset_list")
@@ -46,20 +46,23 @@ def endpoint_asset_list(request : Request):
 	# Verify token
 	access_token = request.headers.get('access-token')
 	#access.validate_access_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
-		
+
 	# Parse the asset directory
 	asset_list : List[assets.Asset] = []
 	root_dir = pathlib.Path(config.ASSET_DIRECTORY)
 	asset_yaml_files = root_dir.glob("*/asset.yaml")
 
+	# Read asset yaml files
 	for asset_yaml_file in asset_yaml_files:
 		asset_list.append(assets.Asset(asset_yaml=asset_yaml_file))
 
 	return {
 		"meta":templates.MetaField(templates.EndpointKind.asset_list),
-		"data":datablocks.DataField(),
+		"data":datablocks.DataField([]),
 		"assets":asset_list
 	}
+
+	
 
 @app.get("/implementation_list/{asset_name}")
 def endpoint_implementation_list(asset_name:str,request:Request,response:Response,resolution:int,lod:str):
