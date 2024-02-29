@@ -8,6 +8,10 @@ class EndpointKind(StrEnum):
 	initialization = "initialization"
 	asset_list = "asset_list"
 	implementation_list = "implementation_list"
+	unlock = "unlock"
+	unlocked_datablocks="unlocked_datablocks"
+	session_state = "session_state"
+
 
 class MetaField:
 	def __init__(self,kind : EndpointKind,message : str = "OK",version : str = "0.2.0-dev") -> None:

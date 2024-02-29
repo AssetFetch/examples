@@ -33,6 +33,9 @@ class ImplementationListQueryBlock(templates.VariableQuery,Datablock):
 class AssetListQueryBlock(templates.VariableQuery,Datablock):
 	block_name = "asset_list_query"
 
+class UnlockableDataQuery(templates.VariableQuery,Datablock):
+	block_name = "unlockable_data_query"
+
 class TextBlock(Datablock):
 	block_name = "text"
 	def __init__(self,title : str, description : str = None) -> None:
@@ -48,15 +51,28 @@ class SingularHeader:
 		self.title = title
 		self.acquisition_uri = acquisition_uri
 		self.acquisition_uri_title = acquisition_uri_title
-class HeadersBlock(List[SingularHeader],Datablock):
-	block_name = "headers"
 
-class UnlockInitializationBlock(Datablock):
-	block_name = "unlock_initialization"
-	def __init__(self,currency:str,is_prepaid:bool,prepaid_balance_refill_uri:str,prepaid_balance_check_query : templates.FixedQuery) -> None:
-		self.currency = currency
-		self.is_prepaid = is_prepaid
-		self.prepaid_balance_refill_uri = prepaid_balance_refill_uri
+class ProviderConfigurationBlock(Datablock):
+	block_name = "provider_configuration"
+	def __init__(self,headers:List[SingularHeader],session_state_query:templates.FixedQuery) -> None:
+		self.headers = headers
+		self.session_state_query = session_state_query
+		super().__init__()
+
+class UnlockStatusBlock(Datablock):
+	block_name = "unlock_status"
+	def __init__(self,balance:float,balance_unit:str,balance_refill_uri:str) -> None:
+		self.balance = balance
+		self.balance_unit = balance_unit
+		self.balance_refill_uri = balance_refill_uri
+
+class UnlockBlock(Datablock):
+	block_name = "unlock"
+	def __init__(self,locked:bool,price:float,unlock_query:templates.FixedQuery) -> None:
+		self.locked = locked
+		self.price = price
+		self.unlock_query = unlock_query
+		super().__init__()
 
 class SingularWebReference:
 	def __init__(self,title:str,uri:str) -> None:

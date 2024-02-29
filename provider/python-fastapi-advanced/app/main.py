@@ -21,10 +21,9 @@ def endpoint_initialization():
 			[
 				datablocks.AssetListQueryBlock(uri=f"{config.API_URL}/asset_list",method=templates.HttpMethod.GET,parameters=[]),
 				datablocks.TextBlock("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
-				datablocks.HeadersBlock([
-					datablocks.SingularHeader("access-token",True,True,"Access Token","","")
-				]),
-				datablocks.UnlockInitializationBlock("Credits",True,"",templates.FixedQuery("",templates.HttpMethod.GET,{})),
+				datablocks.ProviderConfigurationBlock(
+					headers=[datablocks.SingularHeader("access-token",True,True,"Access Token","","")],
+					session_state_query=templates.FixedQuery("",templates.HttpMethod.GET,{})),
 				datablocks.WebReferencesBlock([
 					datablocks.SingularWebReference(
 						"AssetFetch Website",
