@@ -187,3 +187,11 @@ class LooseMaterialApplyBlock(Datablock):
 		super().__init__()
 		self.material_name : str = material_name
 		self.apply_selectively_to : str|None = apply_selectively_to
+
+class UserBlock(Datablock):
+	block_name = "user"
+	def __init__(self,display_name:str,display_tier:str,display_icon_uri:str) -> None:
+		super().__init__()
+		self.display_name = display_name
+		self.display_tier = display_tier
+		self.display_icon_uri = display_icon_uri

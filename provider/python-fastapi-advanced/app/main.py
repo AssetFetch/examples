@@ -40,10 +40,14 @@ def endpoint_initialization():
 def endpoint_connection_status(request:Request):
 	# Verify token
 	access_token = request.headers.get('access-token')
-	access.validate_access_token(access_token=access_token,endpoint_kind=templates.EndpointKind.connection_status)
+	user = access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.connection_status)
 	return{
 		"meta":templates.MetaField(templates.EndpointKind.connection_status),
-		"data":{}
+		"data":datablocks.DataField([
+			datablocks.UserBlock(user.name,"Standard User","https://placekitten.com/256/256"),
+			
+			]
+		)
 	}
 
 # Asset List Endpoint
@@ -52,7 +56,7 @@ def endpoint_asset_list(request : Request):
 
 	# Verify token
 	access_token = request.headers.get('access-token')
-	#access.validate_access_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
+	#access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
 
 	# Parse the asset directory
 	asset_list : List[assets.Asset] = []
@@ -76,7 +80,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 	# Verify token
 	access_token = request.headers.get('access-token')
-	#access.validate_access_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
+	#access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
 
 	# Input sanitization for ID strings.
 	# This is specifically to ensure that the asset_name does not contain any relative references (like ../ )
