@@ -23,17 +23,27 @@ def endpoint_initialization():
 				datablocks.TextBlock("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
 				datablocks.ProviderConfigurationBlock(
 					headers=[datablocks.SingularHeader("access-token",True,True,"Access Token","","")],
-					session_state_query=templates.FixedQuery("",templates.HttpMethod.GET,{})),
+					connection_status_query=templates.FixedQuery(f"{config.API_URL}/status",templates.HttpMethod.GET,{})),
 				datablocks.WebReferencesBlock([
 					datablocks.SingularWebReference(
 						"AssetFetch Website",
 						"https://assetfetch.org"
 					)
 				]),
-				datablocks.BrandingBlock("abcdef","","",""),
-				datablocks.LicenseBlock("","")
+				datablocks.BrandingBlock("abcdef",f"{config.API_URL}/media/logo_square.png",f"{config.API_URL}/media/logo_wide.png",f"{config.API_URL}/media/banner.png"),
+				datablocks.LicenseBlock("",""),
 			]
 		)
+	}
+
+@app.get("/status")
+def endpoint_connection_status(request:Request):
+	# Verify token
+	access_token = request.headers.get('access-token')
+	access.validate_access_token(access_token=access_token,endpoint_kind=templates.EndpointKind.connection_status)
+	return{
+		"meta":templates.MetaField(templates.EndpointKind.connection_status),
+		"data":{}
 	}
 
 # Asset List Endpoint

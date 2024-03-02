@@ -54,9 +54,9 @@ class SingularHeader:
 
 class ProviderConfigurationBlock(Datablock):
 	block_name = "provider_configuration"
-	def __init__(self,headers:List[SingularHeader],session_state_query:templates.FixedQuery) -> None:
+	def __init__(self,headers:List[SingularHeader],connection_status_query:templates.FixedQuery) -> None:
 		self.headers = headers
-		self.session_state_query = session_state_query
+		self.connection_status_query = connection_status_query
 		super().__init__()
 
 class UnlockStatusBlock(Datablock):

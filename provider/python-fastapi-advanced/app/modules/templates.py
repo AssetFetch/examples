@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Dict, List
 
 from fastapi.encoders import jsonable_encoder
@@ -10,7 +10,7 @@ class EndpointKind(StrEnum):
 	implementation_list = "implementation_list"
 	unlock = "unlock"
 	unlocked_datablocks="unlocked_datablocks"
-	session_state = "session_state"
+	connection_status = "connection_status"
 
 
 class MetaField:
