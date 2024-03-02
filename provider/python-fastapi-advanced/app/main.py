@@ -45,7 +45,7 @@ def endpoint_connection_status(request:Request):
 		"meta":templates.MetaField(templates.EndpointKind.connection_status),
 		"data":datablocks.DataField([
 			datablocks.UserBlock(user.name,"Standard User","https://placekitten.com/256/256"),
-			
+			datablocks.BalanceBlock(user.balance,"credits",f"{config.API_URL}/user/{user.name}/set_balance?balance=20")
 			]
 		)
 	}

@@ -195,3 +195,11 @@ class UserBlock(Datablock):
 		self.display_name = display_name
 		self.display_tier = display_tier
 		self.display_icon_uri = display_icon_uri
+
+class BalanceBlock(Datablock):
+	block_name="unlock_balance"
+	def __init__(self,balance:int,balance_unit:str,balance_refill_url:str) -> None:
+		super().__init__()
+		self.balance = balance
+		self.balance_unit = balance_unit
+		self.balance_refill_url = balance_refill_url
