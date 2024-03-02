@@ -338,3 +338,24 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 		"data":datablocks.DataField([]),
 		"implementations":implementation_list
 	}
+
+@app.get("/user/{user}/get_token")
+def endpoint_get_token(user:str):
+	users.create_if_not_existing(username=user)
+	return {
+		"user":user,
+		"new_token": users.DEMO_USERS[user].generate_new_random_token()
+	}
+
+@app.get("/user/{user}/set_balance")
+def endpoint_set_balance(balance:int,user:str):
+	users.create_if_not_existing(username=user)
+	users.DEMO_USERS[user].balance = balance
+	return{
+		"user":user,
+		"new_balance": users.DEMO_USERS[user].balance
+	}
+
+@app.get("/users")
+def endpoint_users():
+	return users.DEMO_USERS
