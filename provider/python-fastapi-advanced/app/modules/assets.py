@@ -11,9 +11,9 @@ class Asset:
 		with open(asset_yaml, 'r') as file:
 			about_asset = yaml.safe_load(file)
 
-		self.name = pathlib.Path(asset_yaml).parent.name
+		self.id = pathlib.Path(asset_yaml).parent.name
 		self.data = datablocks.DataField([
-			datablocks.ImplementationListQueryBlock(uri=f"{config.API_URL}/implementation_list/{self.name}",method=templates.HttpMethod.GET,parameters = []),
+			datablocks.ImplementationListQueryBlock(uri=f"{config.API_URL}/implementation_list/{self.id}",method=templates.HttpMethod.GET,parameters = []),
 			datablocks.TextBlock(title=about_asset['title'],description=about_asset['description']),
 			datablocks.LicenseBlock(about_asset['license_spdx'],None),
 			datablocks.AuthorsBlock([

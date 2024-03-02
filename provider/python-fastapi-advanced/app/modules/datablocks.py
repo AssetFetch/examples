@@ -105,16 +105,6 @@ class SingularAuthor:
 class AuthorsBlock(Datablock,List[SingularAuthor]):
 	block_name = "authors"
 
-class BehaviorStyle(StrEnum):
-	ACTIVE="active"
-	PASSIVE="passive"
-
-class BehaviorBlock(Datablock):
-	block_name="behavior"
-	def __init__(self,style:BehaviorStyle) -> None:
-		super().__init__()
-		self.style=style
-
 class ObjUpAxis(StrEnum):
 	PLUS_Y = "+y"
 	PLUS_Z = "+z"
@@ -126,31 +116,44 @@ class ObjFormatBlock(Datablock):
 		self.up_axis : ObjUpAxis=up_axis
 		self.use_mtl : bool = use_mtl
 
-class FetchFileBlock(Datablock):
-	block_name = "fetch.file"
-	def __init__(self,component_query:templates.FixedQuery,local_path:str,length:int,extension:str) -> None:
+class FileFetchDownloadBlock(Datablock,templates.FixedQuery):
+	block_name = "file_fetch.download"
+	def __init__(self, uri: str, method: templates.HttpMethod, payload: Dict[str, str]) -> None:
+		super().__init__(uri, method, payload)
+
+class BehaviorStyle(StrEnum):
+	FILE_ACTIVE="file_active"
+	FILE_PASSIVE="file_passive"
+	ARCHIVE="archive"
+class FileInfoBlock(Datablock):
+	block_name = "file_info"
+	def __init__(self,local_path:str,length:int,extension:str,behavior:BehaviorStyle) -> None:
 		super().__init__()
+		self.local_path = local_path
+		self.length = length
+		self.extension = extension
+		self.behavior = behavior
 
-		self.component_query : templates.FixedQuery = component_query
-		self.local_path : str = local_path
 
-		if not extension.startswith('.'):
-			raise Exception("Extension must start with a dot.")
-		self.extension : str = extension
-
-def fetch_file_block_from_path(file_path : pathlib.Path,local_path:str) -> FetchFileBlock :
+def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDownloadBlock :
 		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
 
-		return FetchFileBlock(
-			component_query=templates.FixedQuery(
-				f"{config.API_URL}/static/{relative_to_asset_dir}",
-				templates.HttpMethod.GET,
-				{}
-			),
-			local_path=local_path,
-			length=os.stat(file_path).st_size,
-			extension="".join(file_path.suffixes)
+		return FileFetchDownloadBlock(
+			f"{config.API_URL}/static/{relative_to_asset_dir}",
+			templates.HttpMethod.GET,
+			{}
 		)
+
+def file_info_block_from_path(file_path : pathlib.Path,local_path:str,behavior:BehaviorStyle) -> FileInfoBlock:
+	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+	return FileInfoBlock(
+		local_path=local_path,
+		length=os.stat(file_path).st_size,
+		extension="".join(file_path.suffixes),
+		behavior=behavior
+	)
+
 
 class LooseMaterialMapName(StrEnum):
 	albedo = "albedo"

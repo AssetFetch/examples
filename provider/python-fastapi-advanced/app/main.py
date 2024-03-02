@@ -124,8 +124,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				obj_path = pathlib.Path(obj_path)
 				obj_component = implementations.AssetImplementationComponent(obj_path.name,[
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,True),
-					datablocks.fetch_file_block_from_path(obj_path,obj_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+					datablocks.file_fetch_download_block_from_path(obj_path),
+					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				obj_mtl_implementation.components.append(obj_component)
 
@@ -134,8 +134,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 			for mtl_path in mtl_files:
 				mtl_path = pathlib.Path(mtl_path)
 				mtl_component = implementations.AssetImplementationComponent(mtl_path.name,[
-					datablocks.fetch_file_block_from_path(mtl_path,mtl_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+					datablocks.file_fetch_download_block_from_path(mtl_path),
+					datablocks.file_info_block_from_path(mtl_path,mtl_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				obj_mtl_implementation.components.append(mtl_component)
 
@@ -145,8 +145,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				jpg_path = pathlib.Path(jpg_path)
 
 				map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-					datablocks.fetch_file_block_from_path(jpg_path,jpg_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+					datablocks.file_fetch_download_block_from_path(jpg_path),
+					datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				obj_mtl_implementation.components.append(map_component)
 
@@ -154,7 +154,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 			# Implementation 2: OBJ with loose PBR maps
 			
-			obj_loose_material_implementation = implementations.AssetImplementation(name="OBJ+LOOSE_MAPS",components=[],data=[
+			obj_loose_material_implementation = implementations.AssetImplementation(id="OBJ+LOOSE_MAPS",components=[],data=[
 				datablocks.TextBlock("OBJ with PBR maps")
 			])
 
@@ -163,8 +163,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				obj_path = pathlib.Path(obj_path)
 				obj_component = implementations.AssetImplementationComponent(obj_path.name,[
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,False),
-					datablocks.fetch_file_block_from_path(obj_path,obj_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE),
+					datablocks.file_fetch_download_block_from_path(obj_path),
+					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE),
 					datablocks.LooseMaterialApplyBlock(asset_name,None)
 				])
 				obj_loose_material_implementation.components.append(obj_component)
@@ -190,9 +190,9 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 				if map:
 					map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-						datablocks.fetch_file_block_from_path(jpg_path,jpg_path.name),
+						datablocks.file_fetch_download_block_from_path(jpg_path),
 						datablocks.LooseMaterialDefineBlock(asset_name,map,colorspace),
-						datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+						datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 					])
 					obj_loose_material_implementation.components.append(map_component)
 
@@ -210,8 +210,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
-					datablocks.fetch_file_block_from_path(usd_path,usd_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+					datablocks.file_fetch_download_block_from_path(usd_path),
+					datablocks.file_info_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				usd_implementation.components.append(usd_component)
 			
@@ -221,8 +221,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				jpg_path = pathlib.Path(jpg_path)
 
 				map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-					datablocks.fetch_file_block_from_path(jpg_path,jpg_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+					datablocks.file_fetch_download_block_from_path(jpg_path),
+					datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				usd_implementation.components.append(map_component)
 
@@ -243,7 +243,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 			# Implementation 1: Loose material
 			
-			mat_loose_material_implementation = implementations.AssetImplementation(name="LOOSE",components=[],data=[
+			mat_loose_material_implementation = implementations.AssetImplementation(id="LOOSE",components=[],data=[
 				datablocks.TextBlock("Set of PBR maps.")
 			])
 
@@ -273,9 +273,9 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 				if map:
 					map_component = implementations.AssetImplementationComponent(map_path.name,[
-						datablocks.fetch_file_block_from_path(map_path,map_path.name),
+						datablocks.file_fetch_download_block_from_path(map_path),
 						datablocks.LooseMaterialDefineBlock(asset_name,map,colorspace),
-						datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+						datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 					])
 					mat_loose_material_implementation.components.append(map_component)
 
@@ -292,8 +292,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
-					datablocks.fetch_file_block_from_path(usd_path,usd_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+					datablocks.file_fetch_download_block_from_path(usd_path),
+					datablocks.file_info_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				usd_implementation.components.append(usd_component)
 
@@ -301,8 +301,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				map_path = pathlib.Path(map_path)
 
 				map_component = implementations.AssetImplementationComponent(map_path.name,[
-					datablocks.fetch_file_block_from_path(map_path,map_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+					datablocks.file_fetch_download_block_from_path(map_path),
+					datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				usd_implementation.components.append(map_component)
 
@@ -317,8 +317,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 			for mtlx_path in mtlx_files:
 				mtlx_path = pathlib.Path(mtlx_path)
 				mtlx_component = implementations.AssetImplementationComponent(mtlx_path.name,[
-					datablocks.fetch_file_block_from_path(mtlx_path,mtlx_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.ACTIVE)
+					datablocks.file_fetch_download_block_from_path(mtlx_path),
+					datablocks.file_info_block_from_path(mtlx_path,mtlx_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				mtlx_implementation.components.append(mtlx_component)
 
@@ -326,8 +326,8 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				map_path = pathlib.Path(map_path)
 
 				map_component = implementations.AssetImplementationComponent(map_path.name,[
-					datablocks.fetch_file_block_from_path(map_path,map_path.name),
-					datablocks.BehaviorBlock(datablocks.BehaviorStyle.PASSIVE)
+					datablocks.file_fetch_download_block_from_path(map_path),
+					datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				mtlx_implementation.components.append(map_component)
 
