@@ -12,7 +12,7 @@ class AssetFetchUser:
 		self.name = name
 		self.balance = balance
 		self.token_sha512 = None
-		self.owns_implementations = List[str]
+		self.owns_implementations : List[str] = []
 
 	def get_owned_asset_names(self):
 		output = []
