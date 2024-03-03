@@ -75,26 +75,26 @@ def endpoint_asset_list(request : Request):
 
 	
 
-@app.get("/implementation_list/{asset_name}")
-def endpoint_implementation_list(asset_name:str,request:Request,response:Response,resolution:int = None,lod:str = None,format:str = None):
+@app.get("/implementation_list/{asset_id}")
+def endpoint_implementation_list(asset_id:str,request:Request,response:Response,resolution:int = None,lod:str = None,format:str = None):
 
 	# Verify token
 	access_token = request.headers.get('access-token')
 	access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
 
 	# Input sanitization for ID strings.
-	# This is specifically to ensure that the asset_name does not contain any relative references (like ../ )
-	asset_name = re.sub("[^0-9A-Za-z_]","",asset_name)
+	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
+	asset_id = re.sub("[^0-9a-z_]","",asset_id)
 
 	# Search the right file for the asset name
-	asset_yaml = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}/asset.yaml")
+	asset_yaml = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/asset.yaml")
 
 	# Get the data for the requested asset
 	try:
 		with open(asset_yaml, 'r') as file:
 			about_asset = yaml.safe_load(file)
 	except FileNotFoundError:
-		raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,f"Could not find an asset with name '{asset_name}'.",status.HTTP_404_NOT_FOUND)
+		raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,f"Could not find an asset with name '{asset_id}'.",status.HTTP_404_NOT_FOUND)
 
 	# Start parsing
 	implementation_list : List[implementations.AssetImplementation] = []
@@ -112,7 +112,9 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 		if lod == None:
 			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'lod' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
 
-		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}/lod.{lod}_tex.{resolution}k/")
+		
+
+		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/lod-{lod}_tex-{resolution}k/")
 		print(f"Asset path is {asset_path}")
 		
 		obj_files = list(asset_path.glob("*.obj"))
@@ -169,7 +171,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,False),
 					datablocks.file_fetch_download_block_from_path(obj_path),
 					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE),
-					datablocks.LooseMaterialApplyBlock(asset_name,None)
+					datablocks.LooseMaterialApplyBlock(asset_id,None)
 				])
 				obj_loose_material_implementation.components.append(obj_component)
 
@@ -195,7 +197,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				if map:
 					map_component = implementations.AssetImplementationComponent(jpg_path.name,[
 						datablocks.file_fetch_download_block_from_path(jpg_path),
-						datablocks.LooseMaterialDefineBlock(asset_name,map,colorspace),
+						datablocks.LooseMaterialDefineBlock(asset_id,map,colorspace),
 						datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 					])
 					obj_loose_material_implementation.components.append(map_component)
@@ -239,7 +241,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 		if format == None:
 			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'format' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
 		
-		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_name}/format.{format}_res.{resolution}k/")
+		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/format.{format}_res.{resolution}k/")
 		print(f"Asset path is {asset_path}")
 
 		map_files = list(asset_path.glob("*.[jp][pn][g]"))
@@ -278,7 +280,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 				if map:
 					map_component = implementations.AssetImplementationComponent(map_path.name,[
 						datablocks.file_fetch_download_block_from_path(map_path),
-						datablocks.LooseMaterialDefineBlock(asset_name,map,colorspace),
+						datablocks.LooseMaterialDefineBlock(asset_id,map,colorspace),
 						datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 					])
 					mat_loose_material_implementation.components.append(map_component)
@@ -351,9 +353,9 @@ def endpoint_unlock(request:Request,asset_id:str,implementation_id:str):
 	user = access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
 
 	# Input sanitization for ID strings.
-	# This is specifically to ensure that the asset_name does not contain any relative references (like ../ )
-	asset_id = re.sub("[^0-9A-Za-z_]","",asset_id)
-	implementation_id = re.sub("[^0-9A-Za-z_]","",implementation_id)
+	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
+	asset_id = re.sub("[^0-9a-z_]","",asset_id)
+	implementation_id = re.sub("[^0-9a-z_]","",implementation_id)
 
 	#if(pathlib.Path(f"{config.ASSET_DIRECTORY}/{}"))
 
