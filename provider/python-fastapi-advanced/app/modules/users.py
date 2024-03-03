@@ -1,6 +1,6 @@
 import random
 import string
-from typing import Dict
+from typing import Dict, List
 
 class AssetFetchUser:
 	def __init__(self,name:str,balance:int = 10) -> None:
@@ -12,6 +12,12 @@ class AssetFetchUser:
 		self.name = name
 		self.balance = balance
 		self.token_sha512 = None
+		self.owns_implementations = List[str]
+
+	def get_owned_asset_names(self):
+		output = []
+		for i in self.owns_implementations:
+			output.append(str.split(i,"/")[1])
 
 	def generate_new_random_token(self) -> str:
 		from . import access

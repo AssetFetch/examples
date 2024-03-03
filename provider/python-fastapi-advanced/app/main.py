@@ -56,7 +56,7 @@ def endpoint_asset_list(request : Request):
 
 	# Verify token
 	access_token = request.headers.get('access-token')
-	#access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
+	access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
 
 	# Parse the asset directory
 	asset_list : List[assets.Asset] = []
@@ -80,7 +80,7 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 
 	# Verify token
 	access_token = request.headers.get('access-token')
-	#access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
+	access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
 
 	# Input sanitization for ID strings.
 	# This is specifically to ensure that the asset_name does not contain any relative references (like ../ )
@@ -342,6 +342,22 @@ def endpoint_implementation_list(asset_name:str,request:Request,response:Respons
 		"data":datablocks.DataField([]),
 		"implementations":implementation_list
 	}
+
+@app.post("/unlock")
+def endpoint_unlock(request:Request,asset_id:str,implementation_id:str):
+	
+	# Verify token
+	access_token = request.headers.get('access-token')
+	user = access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
+
+	# Input sanitization for ID strings.
+	# This is specifically to ensure that the asset_name does not contain any relative references (like ../ )
+	asset_id = re.sub("[^0-9A-Za-z_]","",asset_id)
+	implementation_id = re.sub("[^0-9A-Za-z_]","",implementation_id)
+
+	#if(pathlib.Path(f"{config.ASSET_DIRECTORY}/{}"))
+
+	user.owns_implementations = ""
 
 @app.get("/user/{user}/get_token")
 def endpoint_get_token(user:str):
