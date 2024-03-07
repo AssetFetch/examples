@@ -112,16 +112,16 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 		if lod == None:
 			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'lod' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
 
-		
+		implementation_prefix = f"lod-{lod}_tex-{resolution}k"
 
-		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/lod-{lod}_tex-{resolution}k/")
+		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/")
 		print(f"Asset path is {asset_path}")
 		
 		obj_files = list(asset_path.glob("*.obj"))
 		if len(list(obj_files)) > 0:
 
 			# Implementation 1: OBJ with MTL
-			obj_mtl_implementation = implementations.AssetImplementation("OBJ+MTL",components=[],data=[
+			obj_mtl_implementation = implementations.AssetImplementation(f"{implementation_prefix}_obj+mtl",components=[],data=[
 				datablocks.TextBlock("OBJ with MTL file")
 			])
 
@@ -160,7 +160,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 			# Implementation 2: OBJ with loose PBR maps
 			
-			obj_loose_material_implementation = implementations.AssetImplementation(id="OBJ+LOOSE_MAPS",components=[],data=[
+			obj_loose_material_implementation = implementations.AssetImplementation(id=f"{implementation_prefix}_obj+loose_maps",components=[],data=[
 				datablocks.TextBlock("OBJ with PBR maps")
 			])
 
@@ -209,7 +209,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 		usd_files = list(asset_path.glob("*.usd?"))
 		if len(usd_files) > 0:
 			
-			usd_implementation = implementations.AssetImplementation("USD",components=[],data=[
+			usd_implementation = implementations.AssetImplementation(f"{implementation_prefix}_usd",components=[],data=[
 				datablocks.TextBlock("OpenUSD")
 			])
 
@@ -241,7 +241,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 		if format == None:
 			raise exceptions.AssetFetchException(templates.EndpointKind.implementation_list,"Parameter 'format' is not set.",status_code=status.HTTP_400_BAD_REQUEST)
 		
-		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/format.{format}_res.{resolution}k/")
+		implementation_prefix = f"format-{format}_res-{resolution}k"
+
+		asset_path = pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/")
 		print(f"Asset path is {asset_path}")
 
 		map_files = list(asset_path.glob("*.[jp][pn][g]"))
@@ -249,7 +251,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 			# Implementation 1: Loose material
 			
-			mat_loose_material_implementation = implementations.AssetImplementation(id="LOOSE",components=[],data=[
+			mat_loose_material_implementation = implementations.AssetImplementation(id=f"{implementation_prefix}_loose",components=[],data=[
 				datablocks.TextBlock("Set of PBR maps.")
 			])
 
@@ -291,7 +293,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 		usd_files = list(asset_path.glob("*.usd?"))
 		if len(usd_files) > 0:
 			
-			usd_implementation = implementations.AssetImplementation("USD",components=[],data=[
+			usd_implementation = implementations.AssetImplementation(f"{implementation_prefix}_usd",components=[],data=[
 				datablocks.TextBlock("OpenUSD")
 			])
 
@@ -316,7 +318,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 		mtlx_files = list(asset_path.glob("*.mtlx"))
 		if len(mtlx_files) > 0:
-			mtlx_implementation = implementations.AssetImplementation("MTLX",components=[],data=[
+			mtlx_implementation = implementations.AssetImplementation(f"{implementation_prefix}_mtlx",components=[],data=[
 				datablocks.TextBlock("MTLX Material")
 			])
 
