@@ -348,7 +348,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 	}
 
 @app.post("/unlock")
-def endpoint_unlock(request:Request,asset_id:str,implementation_id:str):
+def endpoint_unlock(request:Request,asset_id:str,implementation_prefix:str):
 	
 	# Verify token
 	access_token = request.headers.get('access-token')
@@ -356,12 +356,45 @@ def endpoint_unlock(request:Request,asset_id:str,implementation_id:str):
 
 	# Input sanitization for ID strings.
 	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
-	asset_id = re.sub("[^0-9a-z_]","",asset_id)
-	implementation_id = re.sub("[^0-9a-z_]","",implementation_id)
+	asset_id = re.sub("[^0-9a-z_-]","",asset_id)
+	implementation_prefix = re.sub("[^0-9a-z_-]","",implementation_prefix)
 
-	#if(pathlib.Path(f"{config.ASSET_DIRECTORY}/{}"))
+	# Verify that this implementation exists
+	if implementation_prefix=="" or not pathlib.Path(f"{config.ASSET_DIRECTORY}/{implementation_prefix}/").exists():
+		raise exceptions.AssetFetchException(templates.EndpointKind.unlock,"This combination of asset/implementation does not exist.",status.HTTP_404_NOT_FOUND)
 
-	user.owns_implementations = ""
+	if user.balance < 1:
+		raise exceptions.AssetFetchException(templates.EndpointKind.unlock,"No implementation credits left.",status.HTTP_402_PAYMENT_REQUIRED)
+	
+	user.balance -= 1
+	user.purchases.append(users.AssetFetchPurchase(f"{asset_id}/{implementation_prefix}"))
+
+	return{
+		"meta":templates.MetaField(templates.EndpointKind.unlock)
+	}
+
+@app.get("/unlocked_datablocks")
+def endpoint_unlocked_datablocks(request:Request,asset_id:str,implementation_prefix:str,filename:str):
+
+	# Verify token
+	access_token = request.headers.get('access-token')
+	user = access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.asset_list)
+
+	# Input sanitization for ID strings.
+	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
+	asset_id = re.sub("[^0-9a-z_-]","",asset_id)
+	implementation_prefix = re.sub("[^0-9a-z_-]","",implementation_prefix)
+
+	for p in user.purchases:
+		if p.purchase_identifier == f"{asset_id}/{implementation_prefix}":
+			return{
+				"meta":templates.MetaField(templates.EndpointKind.unlocked_datablocks),
+				"data":{
+					datablocks.file_fetch_download_block_from_path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{filename}")
+				}
+			}
+	raise exceptions.AssetFetchException(templates.EndpointKind.unlocked_datablocks,"The requested data was not found among this user's purchases.",status.HTTP_403_FORBIDDEN)
+
 
 @app.get("/user/{user}/get_token")
 def endpoint_get_token(user:str):

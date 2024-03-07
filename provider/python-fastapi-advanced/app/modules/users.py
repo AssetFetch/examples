@@ -1,6 +1,10 @@
-import random
-import string
-from typing import Dict, List
+import random, string, datetime
+from typing import Dict,List
+
+class AssetFetchPurchase:
+	def __init__(self,purchase_identifier:str) -> None:
+		self.purchase_identifier = purchase_identifier
+		self.purchase_time = datetime.datetime.now()
 
 class AssetFetchUser:
 	def __init__(self,name:str,balance:int = 10) -> None:
@@ -12,7 +16,7 @@ class AssetFetchUser:
 		self.name = name
 		self.balance = balance
 		self.token_sha512 = None
-		self.owns_implementations : List[str] = []
+		self.purchases : List[AssetFetchPurchase] = list()
 
 	def get_owned_asset_names(self):
 		output = []
