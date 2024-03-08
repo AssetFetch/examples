@@ -6,7 +6,7 @@ import pathlib
 from typing import Dict, List
 from abc import ABC,abstractmethod
 
-from . import templates,config
+from . import templates,config,users
 
 class Datablock:
 	"""Abstract class that all datablocks must implement.
@@ -127,7 +127,6 @@ class FileInfoBlock(Datablock):
 		self.extension = extension
 		self.behavior = behavior
 
-
 def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDownloadBlock :
 		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
 
@@ -203,6 +202,17 @@ class UnlockLinkBlock(Datablock):
 		self.unlock_query_id = unlock_query_id
 		self.unlocked_datablocks_query = unlocked_datablocks_query
 
+def unlock_link_block_from_path(file_path:pathlib.Path) -> UnlockLinkBlock:
+	return UnlockLinkBlock(file_path.parent.name,templates.FixedQuery(
+		f"{config.API_URL}/unlocked_datablocks",
+		templates.HttpMethod.GET,
+		{
+			"asset_id":file_path.parent.parent.name,
+			"implementation_prefix":file_path.parent.name,
+			"file_name":file_path.name
+		}
+	))
+
 class UnlockQuery:
 	def __init__(self,id:str,unlocked:bool,price:int,unlock_query:templates.FixedQuery,unlock_query_fallback_uri:str) -> None:
 		self.id = id
@@ -213,3 +223,23 @@ class UnlockQuery:
 
 class UnlockQueriesBlock(Datablock,List[UnlockQuery]):
 	block_name = "unlock_queries"
+
+def unlock_queries_block_from_directory(directory_path : pathlib.Path,user:users.AssetFetchUser) -> UnlockQueriesBlock:
+	asset_id = directory_path.name
+	subdirectories = list(pathlib.Path.iterdir())
+	
+	unlock_queries_block = UnlockQueriesBlock()
+
+	for s in subdirectories:
+		unlock_queries_block.append(
+			UnlockQuery(
+				id=s.name,
+				unlocked= (f"{asset_id}/{s.name}" in user.get_all_purchased_identifiers()),
+				price=1,
+				unlock_query=templates.FixedQuery(f"{config.API_URL}/unlock",templates.HttpMethod.POST,{
+					"asset_id":asset_id,
+					"implementation_prefix":s.name
+				})
+			)
+		)
+	return unlock_queries_block

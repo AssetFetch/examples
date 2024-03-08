@@ -18,10 +18,12 @@ class AssetFetchUser:
 		self.token_sha512 = None
 		self.purchases : List[AssetFetchPurchase] = list()
 
-	def get_owned_asset_names(self):
-		output = []
-		for i in self.owns_implementations:
-			output.append(str.split(i,"/")[1])
+	def get_all_purchased_identifiers(self):
+		out = []
+		for p in self.purchases:
+			out.append(p.purchase_identifier)
+		return out
+
 
 	def generate_new_random_token(self) -> str:
 		from . import access

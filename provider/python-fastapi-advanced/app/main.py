@@ -1,5 +1,6 @@
 from typing import Annotated, List
 from fastapi import FastAPI, Request,Response,status
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import re,pathlib,yaml
 
@@ -9,8 +10,23 @@ from modules import *
 app = FastAPI()
 app.add_exception_handler(exceptions.AssetFetchException,exceptions.assetfetch_exception_handler)
 
-#The static directory contains all the files that are hosted for download.
-app.mount("/static", StaticFiles(directory=config.ASSET_DIRECTORY), name="assets")
+# File endpoint
+@app.get("/static/{asset_id}/{implementation_prefix}/{file_name}")
+def endpoint_file(request:Request,asset_id:str,implementation_prefix:str,file_name:str):
+
+	# Verify token
+	access_token = request.headers.get('access-token')
+	user = access.get_user_from_token(access_token=access_token,endpoint_kind=None)
+
+	# Input sanitization for ID strings.
+	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
+	asset_id = re.sub("[^0-9a-z_-]","",asset_id)
+	implementation_prefix = re.sub("[^0-9a-z_-]","",implementation_prefix)
+	file_name = re.sub("[^0-9a-z._-]","",file_name)
+
+	if f"{asset_id}/{implementation_prefix}" in user.get_all_purchased_identifiers():
+		return FileResponse(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{file_name}")
+	raise exceptions.AssetFetchException(None,"File not accessible.",status_code=status.HTTP_403_FORBIDDEN)
 
 # Init Endpoint
 @app.get("/")
@@ -80,7 +96,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 	# Verify token
 	access_token = request.headers.get('access-token')
-	access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
+	user = access.get_user_from_token(access_token=access_token,endpoint_kind=templates.EndpointKind.implementation_list)
 
 	# Input sanitization for ID strings.
 	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
@@ -98,6 +114,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 	# Start parsing
 	implementation_list : List[implementations.AssetImplementation] = []
+	unlock_queries_block : datablocks.UnlockQueriesBlock = datablocks.UnlockQueriesBlock()
 
 	print(f"Asset is of type {about_asset['kind']}")
 
@@ -130,7 +147,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				obj_path = pathlib.Path(obj_path)
 				obj_component = implementations.AssetImplementationComponent(obj_path.name,[
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,True),
-					datablocks.file_fetch_download_block_from_path(obj_path),
+					datablocks.unlock_link_block_from_path(obj_path),
 					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				obj_mtl_implementation.components.append(obj_component)
@@ -140,7 +157,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for mtl_path in mtl_files:
 				mtl_path = pathlib.Path(mtl_path)
 				mtl_component = implementations.AssetImplementationComponent(mtl_path.name,[
-					datablocks.file_fetch_download_block_from_path(mtl_path),
+					datablocks.unlock_link_block_from_path(mtl_path),
 					datablocks.file_info_block_from_path(mtl_path,mtl_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				obj_mtl_implementation.components.append(mtl_component)
@@ -151,7 +168,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				jpg_path = pathlib.Path(jpg_path)
 
 				map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-					datablocks.file_fetch_download_block_from_path(jpg_path),
+					datablocks.unlock_link_block_from_path(jpg_path),
 					datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				obj_mtl_implementation.components.append(map_component)
@@ -169,7 +186,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				obj_path = pathlib.Path(obj_path)
 				obj_component = implementations.AssetImplementationComponent(obj_path.name,[
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,False),
-					datablocks.file_fetch_download_block_from_path(obj_path),
+					datablocks.unlock_link_block_from_path(obj_path),
 					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE),
 					datablocks.LooseMaterialApplyBlock(asset_id,None)
 				])
@@ -196,7 +213,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 				if map:
 					map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-						datablocks.file_fetch_download_block_from_path(jpg_path),
+						datablocks.unlock_link_block_from_path(jpg_path),
 						datablocks.LooseMaterialDefineBlock(asset_id,map,colorspace),
 						datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 					])
@@ -216,7 +233,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
-					datablocks.file_fetch_download_block_from_path(usd_path),
+					datablocks.unlock_link_block_from_path(usd_path),
 					datablocks.file_info_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				usd_implementation.components.append(usd_component)
@@ -227,7 +244,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				jpg_path = pathlib.Path(jpg_path)
 
 				map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-					datablocks.file_fetch_download_block_from_path(jpg_path),
+					datablocks.unlock_link_block_from_path(jpg_path),
 					datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				usd_implementation.components.append(map_component)
@@ -281,7 +298,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 				if map:
 					map_component = implementations.AssetImplementationComponent(map_path.name,[
-						datablocks.file_fetch_download_block_from_path(map_path),
+						datablocks.unlock_link_block_from_path(map_path),
 						datablocks.LooseMaterialDefineBlock(asset_id,map,colorspace),
 						datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 					])
@@ -300,7 +317,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
-					datablocks.file_fetch_download_block_from_path(usd_path),
+					datablocks.unlock_link_block_from_path(usd_path),
 					datablocks.file_info_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				usd_implementation.components.append(usd_component)
@@ -309,7 +326,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				map_path = pathlib.Path(map_path)
 
 				map_component = implementations.AssetImplementationComponent(map_path.name,[
-					datablocks.file_fetch_download_block_from_path(map_path),
+					datablocks.unlock_link_block_from_path(map_path),
 					datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				usd_implementation.components.append(map_component)
@@ -325,7 +342,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for mtlx_path in mtlx_files:
 				mtlx_path = pathlib.Path(mtlx_path)
 				mtlx_component = implementations.AssetImplementationComponent(mtlx_path.name,[
-					datablocks.file_fetch_download_block_from_path(mtlx_path),
+					datablocks.unlock_link_block_from_path(mtlx_path),
 					datablocks.file_info_block_from_path(mtlx_path,mtlx_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
 				])
 				mtlx_implementation.components.append(mtlx_component)
@@ -334,16 +351,32 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				map_path = pathlib.Path(map_path)
 
 				map_component = implementations.AssetImplementationComponent(map_path.name,[
-					datablocks.file_fetch_download_block_from_path(map_path),
+					datablocks.unlock_link_block_from_path(map_path),
 					datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
 				])
 				mtlx_implementation.components.append(map_component)
 
 			implementation_list.append(mtlx_implementation)
 
+	# Test if the user already owns this implementation and generate unlock query accordingly
+	unlock_queries_block.append(datablocks.UnlockQuery(
+		id=implementation_prefix,
+		unlocked= (f"{asset_id}/{implementation_prefix}" in user.get_all_purchased_identifiers()),
+		price=1,
+		unlock_query=templates.FixedQuery(
+			f"{config.API_URL}/unlock",
+			templates.HttpMethod.POST,
+			{
+				"asset_id":asset_id,
+				"implementation_prefix":implementation_prefix
+			}
+		),
+		unlock_query_fallback_uri=None
+	))
+
 	return {
 		"meta":templates.MetaField(templates.EndpointKind.implementation_list),
-		"data":datablocks.DataField([]),
+		"data":datablocks.DataField([unlock_queries_block]),
 		"implementations":implementation_list
 	}
 
@@ -360,21 +393,23 @@ def endpoint_unlock(request:Request,asset_id:str,implementation_prefix:str):
 	implementation_prefix = re.sub("[^0-9a-z_-]","",implementation_prefix)
 
 	# Verify that this implementation exists
-	if implementation_prefix=="" or not pathlib.Path(f"{config.ASSET_DIRECTORY}/{implementation_prefix}/").exists():
+	if implementation_prefix=="" or not pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/").exists():
 		raise exceptions.AssetFetchException(templates.EndpointKind.unlock,"This combination of asset/implementation does not exist.",status.HTTP_404_NOT_FOUND)
 
 	if user.balance < 1:
 		raise exceptions.AssetFetchException(templates.EndpointKind.unlock,"No implementation credits left.",status.HTTP_402_PAYMENT_REQUIRED)
 	
-	user.balance -= 1
-	user.purchases.append(users.AssetFetchPurchase(f"{asset_id}/{implementation_prefix}"))
+	purchase_identifier = f"{asset_id}/{implementation_prefix}"
+	if purchase_identifier not in user.get_all_purchased_identifiers():
+		user.balance -= 1
+		user.purchases.append(users.AssetFetchPurchase(purchase_identifier=purchase_identifier))
 
 	return{
 		"meta":templates.MetaField(templates.EndpointKind.unlock)
 	}
 
 @app.get("/unlocked_datablocks")
-def endpoint_unlocked_datablocks(request:Request,asset_id:str,implementation_prefix:str,filename:str):
+def endpoint_unlocked_datablocks(request:Request,asset_id:str,implementation_prefix:str,file_name:str):
 
 	# Verify token
 	access_token = request.headers.get('access-token')
@@ -384,14 +419,15 @@ def endpoint_unlocked_datablocks(request:Request,asset_id:str,implementation_pre
 	# This is specifically to ensure that the asset_id does not contain any relative references (like ../ )
 	asset_id = re.sub("[^0-9a-z_-]","",asset_id)
 	implementation_prefix = re.sub("[^0-9a-z_-]","",implementation_prefix)
+	file_name = re.sub("[^0-9a-z._-]","",file_name)
 
 	for p in user.purchases:
 		if p.purchase_identifier == f"{asset_id}/{implementation_prefix}":
 			return{
 				"meta":templates.MetaField(templates.EndpointKind.unlocked_datablocks),
-				"data":{
-					datablocks.file_fetch_download_block_from_path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{filename}")
-				}
+				"data":datablocks.DataField([
+					datablocks.file_fetch_download_block_from_path(pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{file_name}"))
+				])
 			}
 	raise exceptions.AssetFetchException(templates.EndpointKind.unlocked_datablocks,"The requested data was not found among this user's purchases.",status.HTTP_403_FORBIDDEN)
 
