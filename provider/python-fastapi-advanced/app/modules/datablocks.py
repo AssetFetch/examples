@@ -59,13 +59,6 @@ class ProviderConfigurationBlock(Datablock):
 		self.connection_status_query = connection_status_query
 		super().__init__()
 
-class UnlockStatusBlock(Datablock):
-	block_name = "unlock_status"
-	def __init__(self,balance:float,balance_unit:str,balance_refill_uri:str) -> None:
-		self.balance = balance
-		self.balance_unit = balance_unit
-		self.balance_refill_uri = balance_refill_uri
-
 class UnlockBlock(Datablock):
 	block_name = "unlock"
 	def __init__(self,locked:bool,price:float,unlock_query:templates.FixedQuery) -> None:
@@ -196,10 +189,27 @@ class UserBlock(Datablock):
 		self.display_tier = display_tier
 		self.display_icon_uri = display_icon_uri
 
-class BalanceBlock(Datablock):
+class UnlockBalanceBlock(Datablock):
 	block_name="unlock_balance"
 	def __init__(self,balance:int,balance_unit:str,balance_refill_url:str) -> None:
 		super().__init__()
 		self.balance = balance
 		self.balance_unit = balance_unit
 		self.balance_refill_url = balance_refill_url
+
+class UnlockLinkBlock(Datablock):
+	block_name="unlock_link"
+	def __init__(self,unlock_query_id:str,unlocked_datablocks_query:templates.FixedQuery):
+		self.unlock_query_id = unlock_query_id
+		self.unlocked_datablocks_query = unlocked_datablocks_query
+
+class UnlockQuery:
+	def __init__(self,id:str,unlocked:bool,price:int,unlock_query:templates.FixedQuery,unlock_query_fallback_uri:str) -> None:
+		self.id = id
+		self.unlocked = unlocked
+		self.price = price
+		self.unlock_query = unlock_query
+		self.unlock_query_fallback_uri = unlock_query_fallback_uri
+
+class UnlockQueriesBlock(Datablock,List[UnlockQuery]):
+	block_name = "unlock_queries"
