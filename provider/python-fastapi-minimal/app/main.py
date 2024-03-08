@@ -42,14 +42,14 @@ def endpoint_initialization():
 		"meta":{
 			"kind": "initialization",
 			"message":"OK",
-			"version":"0.1"
+			"version":"0.2-dev"
 		},
 		"data":{
 			# This datablock tells the client where to go to get the asset list
 			"asset_list_query":{
 				"uri": f"{API_URL}/asset_list",
-				"method":"GET",
-				"parameters":{}
+				"method":"get",
+				"parameters":[]
 			},
 			# This datablock tells the client a display name and a description for this provider
 			"text":{
@@ -74,13 +74,13 @@ def endpoint_asset_list():
 		asset_name = obj_path.name.split(".")[0]
 
 		asset = {
-			"name":asset_name,
+			"id":asset_name,
 			"data":{
 				# This is the query that the client has to call to find out how to actually download the asset
-				"implementations_query":{
+				"implementation_list_query":{
 					"uri": f"{API_URL}/implementation_list/{asset_name}",
-					"method":"GET",
-					"parameters":{}
+					"method":"get",
+					"parameters":[]
 				},
 				"preview_image_thumbnail":{
 					"uris":{
@@ -98,7 +98,7 @@ def endpoint_asset_list():
 		"meta":{
 			"kind": "asset_list",
 			"message":"OK",
-			"version":"0.1"
+			"version":"0.2-dev"
 		},
 		"data":{},
 		"assets": assets
@@ -121,14 +121,14 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 			"meta":{
 				"kind": "implementation_list",
 				"message":"OK",
-				"version":"0.1"
+				"version":"0.2-dev"
 			},
 			"data":{},
 			# There is only one implementation with one file, so we just define it right here
 			# In a more complex implementation this would be generated programmatically
 			"implementations":[
 				{
-					"name":"obj-untextured",
+					"id":"obj-untextured",
 					"data":{
 						"text":{
 							"title": "Wavefront OBJ (Untextured)"
@@ -138,17 +138,17 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 						{
 							"name":asset_file.name,
 							"data":{
-								"fetch.file":{
-									"component_query":{
-										"uri": f"{API_URL}/static/{asset_file.name}",
-										"method": "GET",
-										"payload": None
-									},
+								"file_fetch.download":{
+									"uri": f"{API_URL}/static/{asset_file.name}",
+									"method": "get",
+									"payload": {}
+								},
+								"file_info":{
 									"local_path":asset_file.name,
 									"length":asset_file.stat().st_size,
 									"extension":asset_file.suffix
 								},
-								"obj":{
+								"format.obj":{
 									"up_axis": "+y",
 									"use_mtl": False
 								}
@@ -163,7 +163,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 			"meta":{
 				"kind": "implementation_list",
 				"message":"The requested asset could not be found.",
-				"version":"0.1"
+				"version":"0.2-dev"
 			}
 		}
 		response.status_code = status.HTTP_404_NOT_FOUND
