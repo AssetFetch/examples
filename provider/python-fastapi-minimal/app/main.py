@@ -44,6 +44,7 @@ def endpoint_initialization():
 			"message":"OK",
 			"version":"0.2-dev"
 		},
+		"id":"minimal.example.assetfetch.org",
 		"data":{
 			# This datablock tells the client where to go to get the asset list
 			"asset_list_query":{
@@ -136,7 +137,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 					},
 					"components":[
 						{
-							"name":asset_file.name,
+							"id":asset_file.name,
 							"data":{
 								"file_fetch.download":{
 									"uri": f"{API_URL}/static/{asset_file.name}",
