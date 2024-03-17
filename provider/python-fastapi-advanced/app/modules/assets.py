@@ -6,17 +6,48 @@ import yaml
 from . import datablocks,templates,config
 
 class Asset:
-	def __init__(self,asset_yaml:str) -> None:
+	def __init__(self,id:str,title:str,description:str,license_spdx:str,author:str,author_uri:str,kind:str) -> None:
 
-		with open(asset_yaml, 'r') as file:
-			about_asset = yaml.safe_load(file)
+		parameters = []
 
-		self.id = pathlib.Path(asset_yaml).parent.name
+		if kind == "material":
+			parameters.append(templates.HttpParameter(
+				type=templates.HttpParameterType.select,
+				name="resolution",
+				title="Resolution",
+				choices=["1k","2k"],
+				mandatory=True
+			))
+			parameters.append(templates.HttpParameter(
+				type=templates.HttpParameterType.select,
+				name="format",
+				title="Format",
+				choices=["jpg","png"],
+				mandatory=True
+			))
+		
+		if kind == "model":
+			parameters.append(templates.HttpParameter(
+				type=templates.HttpParameterType.select,
+				name="resolution",
+				title="Resolution",
+				choices=["1k","2k"],
+				mandatory=True
+			))
+			parameters.append(templates.HttpParameter(
+				type=templates.HttpParameterType.select,
+				name="lod",
+				title="Level of Detail",
+				choices=["low","medium"],
+				mandatory=True
+			))
+
+		self.id = id
 		self.data = datablocks.DataField([
-			datablocks.ImplementationListQueryBlock(uri=f"{config.API_URL}/implementation_list/{self.id}",method=templates.HttpMethod.GET,parameters = []),
-			datablocks.TextBlock(title=about_asset['title'],description=about_asset['description']),
-			datablocks.LicenseBlock(about_asset['license_spdx'],None),
+			datablocks.ImplementationListQueryBlock(uri=f"{config.API_URL}/implementation_list/{self.id}",method=templates.HttpMethod.GET,parameters = parameters),
+			datablocks.TextBlock(title=title,description=description),
+			datablocks.LicenseBlock(license_spdx,None),
 			datablocks.AuthorsBlock([
-				datablocks.SingularAuthor(about_asset['author'],about_asset['author_uri'],None)
+				datablocks.SingularAuthor(author,author_uri,None)
 			])
 		])

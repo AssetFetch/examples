@@ -33,9 +33,18 @@ def endpoint_file(request:Request,asset_id:str,implementation_prefix:str,file_na
 def endpoint_initialization():
 	return {
 		"meta": templates.MetaField(templates.EndpointKind.initialization),
+		"id": "advanced.examples.assetfetch.org",
 		"data": datablocks.DataField(
 			[
-				datablocks.AssetListQueryBlock(uri=f"{config.API_URL}/asset_list",method=templates.HttpMethod.GET,parameters=[]),
+				datablocks.AssetListQueryBlock(uri=f"{config.API_URL}/asset_list",method=templates.HttpMethod.GET,parameters=[
+					templates.HttpParameter(
+						type= templates.HttpParameterType.text,
+						name="filter",
+						title="Filter",
+						default="",
+						mandatory=False
+					)
+				]),
 				datablocks.TextBlock("Advanced Example Provider","This is a more advanced provider for AssetFetch."),
 				datablocks.ProviderConfigurationBlock(
 					headers=[datablocks.SingularHeader("access-token",True,True,"Access Token","","")],
@@ -68,7 +77,7 @@ def endpoint_connection_status(request:Request):
 
 # Asset List Endpoint
 @app.get("/asset_list")
-def endpoint_asset_list(request : Request):
+def endpoint_asset_list(request : Request,filter:str = ""):
 
 	# Verify token
 	access_token = request.headers.get('access-token')
@@ -79,9 +88,33 @@ def endpoint_asset_list(request : Request):
 	root_dir = pathlib.Path(config.ASSET_DIRECTORY)
 	asset_yaml_files = root_dir.glob("*/asset.yaml")
 
+	# Build proper filter array
+	if filter:
+		filter = filter.split(",")
+		for i in range(len(filter)):
+			filter[i] = filter[i].strip()
+
+	
+
 	# Read asset yaml files
 	for asset_yaml_file in asset_yaml_files:
-		asset_list.append(assets.Asset(asset_yaml=asset_yaml_file))
+		with open(asset_yaml_file, 'r') as file:
+			about_asset = yaml.safe_load(file)
+			asset = assets.Asset(
+				id=pathlib.Path(asset_yaml_file).parent.name,
+				title=about_asset['title'],
+				description=about_asset['description'],
+				license_spdx=about_asset['license_spdx'],
+				author=about_asset['author'],
+				author_uri=about_asset['author_uri'],
+				kind=about_asset['kind']
+			)
+
+		if filter:
+			if set(filter).issubset(set(about_asset['tags'])):
+				asset_list.append(asset)
+		else:
+			asset_list.append(asset)
 
 	return {
 		"meta":templates.MetaField(templates.EndpointKind.asset_list),
