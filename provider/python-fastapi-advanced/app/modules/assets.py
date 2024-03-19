@@ -15,7 +15,7 @@ class Asset:
 				type=templates.HttpParameterType.select,
 				name="resolution",
 				title="Resolution",
-				choices=["1k","2k"],
+				choices=["1","2"],
 				mandatory=True
 			))
 			parameters.append(templates.HttpParameter(
@@ -31,7 +31,7 @@ class Asset:
 				type=templates.HttpParameterType.select,
 				name="resolution",
 				title="Resolution",
-				choices=["1k","2k"],
+				choices=["1","2"],
 				mandatory=True
 			))
 			parameters.append(templates.HttpParameter(
