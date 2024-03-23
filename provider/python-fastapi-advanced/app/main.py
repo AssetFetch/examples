@@ -221,7 +221,7 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,False),
 					datablocks.unlock_link_block_from_path(obj_path),
 					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE),
-					datablocks.LooseMaterialApplyBlock(asset_id,None)
+					datablocks.LooseMaterialApplyBlock([datablocks.LooseMaterialApplyElement(asset_id,None)])
 				])
 				obj_loose_material_implementation.components.append(obj_component)
 

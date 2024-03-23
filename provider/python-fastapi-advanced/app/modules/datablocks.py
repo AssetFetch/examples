@@ -165,6 +165,11 @@ class LooseMaterialColorSpace(StrEnum):
 	SRGB = "srgb"
 	LINEAR = "linear"
 
+class LooseMaterialApplyElement:
+	def __init__(self,material_name:str,apply_selectively_to:str|None) -> None:
+		self.material_name : str = material_name
+		self.apply_selectively_to : str|None = apply_selectively_to
+
 class LooseMaterialDefineBlock(Datablock):
 	block_name="loose_material_define"
 	def __init__(self,material_name:str,map:LooseMaterialMapName,colorspace:LooseMaterialColorSpace) -> None:
@@ -173,12 +178,12 @@ class LooseMaterialDefineBlock(Datablock):
 		self.map : LooseMaterialMapName = map
 		self.colorspace : LooseMaterialColorSpace = colorspace
 
-class LooseMaterialApplyBlock(Datablock):
+class LooseMaterialApplyBlock(Datablock,List[LooseMaterialApplyElement]):
 	block_name="loose_material_apply"
-	def __init__(self,material_name:str,apply_selectively_to:str|None) -> None:
+	def __init__(self,elements : List[LooseMaterialApplyElement]) -> None:
 		super().__init__()
-		self.material_name : str = material_name
-		self.apply_selectively_to : str|None = apply_selectively_to
+		for e in elements:
+			self.append(e)
 
 class UserBlock(Datablock):
 	block_name = "user"
