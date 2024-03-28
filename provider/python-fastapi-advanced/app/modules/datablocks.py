@@ -131,7 +131,7 @@ def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDo
 		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
 
 		return FileFetchDownloadBlock(
-			f"{config.API_URL}/static/{relative_to_asset_dir}",
+			f"{config.API_URL}/asset_file/{relative_to_asset_dir}",
 			templates.HttpMethod.GET,
 			{}
 		)
@@ -184,6 +184,14 @@ class LooseMaterialApplyBlock(Datablock,List[LooseMaterialApplyElement]):
 		super().__init__()
 		for e in elements:
 			self.append(e)
+
+class PreviewImageThumbnailBlock(Datablock):
+	block_name="preview_image_thumbnail"
+	def __init__(self,alt:str,uris:Dict[int,str]) -> None:
+		super().__init__()
+		self.alt = alt
+		self.uris = uris
+
 
 class UserBlock(Datablock):
 	block_name = "user"
