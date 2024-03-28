@@ -185,6 +185,14 @@ class LooseMaterialApplyBlock(Datablock,List[LooseMaterialApplyElement]):
 		for e in elements:
 			self.append(e)
 
+class PreviewImageThumbnailBlock(Datablock):
+	block_name="preview_image_thumbnail"
+	def __init__(self,alt:str,uris:Dict[int,str]) -> None:
+		super().__init__()
+		self.alt = alt
+		self.uris = uris
+
+
 class UserBlock(Datablock):
 	block_name = "user"
 	def __init__(self,display_name:str,display_tier:str,display_icon_uri:str) -> None:
