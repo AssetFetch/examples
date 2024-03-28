@@ -47,6 +47,11 @@ class Asset:
 			datablocks.ImplementationListQueryBlock(uri=f"{config.API_URL}/implementation_list/{self.id}",method=templates.HttpMethod.GET,parameters = parameters),
 			datablocks.TextBlock(title=title,description=description),
 			datablocks.LicenseBlock(license_spdx,None),
+			datablocks.PreviewImageThumbnailBlock(
+				f"{id} Thumbnail",
+				{
+					"256":f"{config.API_URL}/thumbnail/{id}"
+				}),
 			datablocks.AuthorsBlock([
 				datablocks.SingularAuthor(author,author_uri,None)
 			])

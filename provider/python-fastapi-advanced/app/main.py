@@ -11,7 +11,7 @@ app = FastAPI()
 app.add_exception_handler(exceptions.AssetFetchException,exceptions.assetfetch_exception_handler)
 
 # File endpoint
-@app.get("/static/{asset_id}/{implementation_prefix}/{file_name}")
+@app.get("/asset_file/{asset_id}/{implementation_prefix}/{file_name}")
 def endpoint_file(request:Request,asset_id:str,implementation_prefix:str,file_name:str):
 
 	# Verify token
@@ -27,6 +27,10 @@ def endpoint_file(request:Request,asset_id:str,implementation_prefix:str,file_na
 	if f"{asset_id}/{implementation_prefix}" in user.get_all_purchased_identifiers():
 		return FileResponse(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{file_name}")
 	raise exceptions.AssetFetchException(None,"File not accessible.",status_code=status.HTTP_403_FORBIDDEN)
+
+@app.get("/thumbnail/{asset_id}")
+def endpoint_thumbnail(asset_id:str):
+	return FileResponse(f"{config.ASSET_DIRECTORY}/{asset_id}/thumb.png")
 
 # Init Endpoint
 @app.get("/")

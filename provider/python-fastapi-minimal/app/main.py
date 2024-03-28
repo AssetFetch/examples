@@ -85,7 +85,7 @@ def endpoint_asset_list():
 				},
 				"preview_image_thumbnail":{
 					"uris":{
-						256: f"{API_URL}/static/{asset_name}.png"
+						256: f"{API_URL}/thumbnail/{asset_name}"
 					}
 				},
 				"text":{
@@ -140,7 +140,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 							"id":asset_file.name,
 							"data":{
 								"file_fetch.download":{
-									"uri": f"{API_URL}/static/{asset_file.name}",
+									"uri": f"{API_URL}/asset_file/{asset_file.name}",
 									"method": "get",
 									"payload": {}
 								},

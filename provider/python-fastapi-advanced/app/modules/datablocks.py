@@ -131,7 +131,7 @@ def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDo
 		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
 
 		return FileFetchDownloadBlock(
-			f"{config.API_URL}/static/{relative_to_asset_dir}",
+			f"{config.API_URL}/asset_file/{relative_to_asset_dir}",
 			templates.HttpMethod.GET,
 			{}
 		)
