@@ -203,11 +203,11 @@ class UserBlock(Datablock):
 
 class UnlockBalanceBlock(Datablock):
 	block_name="unlock_balance"
-	def __init__(self,balance:int,balance_unit:str,balance_refill_url:str) -> None:
+	def __init__(self,balance:int,balance_unit:str,balance_refill_uri:str) -> None:
 		super().__init__()
 		self.balance = balance
 		self.balance_unit = balance_unit
-		self.balance_refill_url = balance_refill_url
+		self.balance_refill_uri = balance_refill_uri
 
 class UnlockLinkBlock(Datablock):
 	block_name="unlock_link"
