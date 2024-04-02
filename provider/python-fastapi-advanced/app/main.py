@@ -43,7 +43,7 @@ def endpoint_initialization():
 				datablocks.AssetListQueryBlock(uri=f"{config.API_URL}/asset_list",method=templates.HttpMethod.GET,parameters=[
 					templates.HttpParameter(
 						type= templates.HttpParameterType.text,
-						name="filter",
+						id="filter",
 						title="Filter",
 						default="",
 						mandatory=False

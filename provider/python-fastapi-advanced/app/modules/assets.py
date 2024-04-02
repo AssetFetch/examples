@@ -13,32 +13,32 @@ class Asset:
 		if kind == "material":
 			parameters.append(templates.HttpParameter(
 				type=templates.HttpParameterType.select,
-				name="resolution",
+				id="resolution",
 				title="Resolution",
-				choices=["1","2"],
+				choices=[templates.HttpParameterChoice("1K","1"),templates.HttpParameterChoice("2K","2")],
 				mandatory=True
 			))
 			parameters.append(templates.HttpParameter(
 				type=templates.HttpParameterType.select,
-				name="format",
+				id="format",
 				title="Format",
-				choices=["jpg","png"],
+				choices=[templates.HttpParameterChoice("JPG","jpg"),templates.HttpParameterChoice("PNG","png")],
 				mandatory=True
 			))
 		
 		if kind == "model":
 			parameters.append(templates.HttpParameter(
 				type=templates.HttpParameterType.select,
-				name="resolution",
+				id="resolution",
 				title="Resolution",
-				choices=["1","2"],
+				choices=[templates.HttpParameterChoice("1K","1"),templates.HttpParameterChoice("2K","2")],
 				mandatory=True
 			))
 			parameters.append(templates.HttpParameter(
 				type=templates.HttpParameterType.select,
-				name="lod",
+				id="lod",
 				title="Level of Detail",
-				choices=["low","medium"],
+				choices=[templates.HttpParameterChoice("Low","low"),templates.HttpParameterChoice("Medium","medium")],
 				mandatory=True
 			))
 

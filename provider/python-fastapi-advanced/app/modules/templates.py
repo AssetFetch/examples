@@ -31,15 +31,20 @@ class HttpParameterType:
 	select = "select"
 	multiselect = "multiselect"
 
+class HttpParameterChoice:
+	def __init__(self,title,value) -> None:
+		self.title = title
+		self.value = value
+
 class HttpParameter:
-    def __init__(self, type : HttpParameterType, name : str, title : str, default : str = "", mandatory : bool = False, choices : List[str]=[], delimiter : str=','):
-        self.type = type
-        self.name = name
-        self.title = title
-        self.default = default
-        self.mandatory = mandatory
-        self.choices = choices
-        self.delimiter = delimiter
+	def __init__(self, type : HttpParameterType, id : str, title : str, default : str = "", mandatory : bool = False, delimiter : str=',',choices : List[HttpParameterChoice]|None = None,):
+		self.type = type
+		self.id = id
+		self.title = title
+		self.default = default
+		self.mandatory = mandatory
+		self.choices = choices
+		self.delimiter = delimiter
 
 class FixedQuery:
 	def __init__(self,uri : str, method : HttpMethod, payload : Dict[str,str] ) -> None:
