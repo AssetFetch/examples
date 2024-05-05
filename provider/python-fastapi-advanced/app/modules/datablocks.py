@@ -109,10 +109,10 @@ class ObjFormatBlock(Datablock):
 		self.up_axis : ObjUpAxis=up_axis
 		self.use_mtl : bool = use_mtl
 
-class FileFetchDownloadBlock(Datablock,templates.FixedQuery):
-	block_name = "file_fetch.download"
-	def __init__(self, uri: str, method: templates.HttpMethod, payload: Dict[str, str]) -> None:
-		super().__init__(uri, method, payload)
+#class FileFetchDownloadBlock(Datablock,templates.FixedQuery):
+#	block_name = "file_fetch.download"
+#	def __init__(self, uri: str, method: templates.HttpMethod, payload: Dict[str, str]) -> None:
+#		super().__init__(uri, method, payload)
 
 class BehaviorStyle(StrEnum):
 	FILE_ACTIVE="file_active"
@@ -126,26 +126,6 @@ class FileInfoBlock(Datablock):
 		self.length = length
 		self.extension = extension
 		self.behavior = behavior
-
-def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDownloadBlock :
-		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
-
-		return FileFetchDownloadBlock(
-			f"{config.API_URL}/asset_file/{relative_to_asset_dir}",
-			templates.HttpMethod.GET,
-			{}
-		)
-
-def file_info_block_from_path(file_path : pathlib.Path,local_path:str,behavior:BehaviorStyle) -> FileInfoBlock:
-	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
-
-	return FileInfoBlock(
-		local_path=local_path,
-		length=os.stat(file_path).st_size,
-		extension="".join(file_path.suffixes),
-		behavior=behavior
-	)
-
 
 class LooseMaterialMapName(StrEnum):
 	albedo = "albedo"
@@ -171,7 +151,7 @@ class LooseMaterialApplyElement:
 		self.apply_selectively_to : str|None = apply_selectively_to
 
 class LooseMaterialDefineBlock(Datablock):
-	block_name="loose_material_define"
+	block_name="loose_material.define"
 	def __init__(self,material_name:str,map:LooseMaterialMapName,colorspace:LooseMaterialColorSpace) -> None:
 		super().__init__()
 		self.material_name :str = material_name
@@ -179,7 +159,7 @@ class LooseMaterialDefineBlock(Datablock):
 		self.colorspace : LooseMaterialColorSpace = colorspace
 
 class LooseMaterialApplyBlock(Datablock,List[LooseMaterialApplyElement]):
-	block_name="loose_material_apply"
+	block_name="loose_material.apply"
 	def __init__(self,elements : List[LooseMaterialApplyElement]) -> None:
 		super().__init__()
 		for e in elements:
@@ -256,3 +236,31 @@ def unlock_queries_block_from_directory(directory_path : pathlib.Path,user:users
 			)
 		)
 	return unlock_queries_block
+
+class FileFetchDownloadPostUnlockBlock(Datablock):
+	block_name = "file_fetch.download_post_unlock"
+	def __init__(self,unlock_query_id:str,uri: str, method: templates.HttpMethod, payload: Dict[str, str]) -> None:
+		super().__init__()
+		self.unlock_query_id = unlock_query_id
+		self.unlocked_data_query = templates.FixedQuery(
+			uri,method,payload
+		)
+def file_fetch_download_post_unlock_block_from_path(unlock_query_id:str,file_path : pathlib.Path) -> FileFetchDownloadPostUnlockBlock :
+		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+		return FileFetchDownloadPostUnlockBlock(
+			unlock_query_id,
+			f"{config.API_URL}/asset_file/{relative_to_asset_dir}",
+			templates.HttpMethod.GET,
+			{}
+		)
+
+def file_info_block_from_path(file_path : pathlib.Path,local_path:str,behavior:BehaviorStyle) -> FileInfoBlock:
+	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+	return FileInfoBlock(
+		local_path=local_path,
+		length=os.stat(file_path).st_size,
+		extension="".join(file_path.suffixes),
+		behavior=behavior
+	)

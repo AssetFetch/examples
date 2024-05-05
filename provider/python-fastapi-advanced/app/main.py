@@ -463,7 +463,7 @@ def endpoint_unlocked_datablocks(request:Request,asset_id:str,implementation_pre
 			return{
 				"meta":templates.MetaField(templates.EndpointKind.unlocked_datablocks),
 				"data":datablocks.DataField([
-					datablocks.file_fetch_download_block_from_path(pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{file_name}"))
+					datablocks.file_fetch_download_post_unlock_block_from_path(pathlib.Path(f"{config.ASSET_DIRECTORY}/{asset_id}/{implementation_prefix}/{file_name}"))
 				])
 			}
 	raise exceptions.AssetFetchException(templates.EndpointKind.unlocked_datablocks,"The requested data was not found among this user's purchases.",status.HTTP_403_FORBIDDEN)
