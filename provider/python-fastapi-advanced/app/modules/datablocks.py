@@ -115,9 +115,10 @@ class FileFetchDownloadBlock(Datablock,templates.FixedQuery):
 		super().__init__(uri, method, payload)
 
 class BehaviorStyle(StrEnum):
-	FILE_ACTIVE="file_active"
-	FILE_PASSIVE="file_passive"
-	ARCHIVE="archive"
+	SINGLE_ACTIVE="single_active"
+	SINGLE_PASSIVE="single_passive"
+	# Other behaviors don't appear in this provider
+	
 class FileInfoBlock(Datablock):
 	block_name = "file_info"
 	def __init__(self,length:int,extension:str) -> None:

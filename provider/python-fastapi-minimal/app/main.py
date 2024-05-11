@@ -150,7 +150,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 								},
 								"file_handle":{
 									"local_path":asset_file.name,
-									"behavior":"file_active"
+									"behavior":"single_active"
 								},
 								"format.obj":{
 									"up_axis": "+y",
