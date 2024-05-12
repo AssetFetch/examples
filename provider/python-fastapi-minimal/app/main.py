@@ -145,9 +145,12 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 									"payload": {}
 								},
 								"file_info":{
-									"local_path":asset_file.name,
 									"length":asset_file.stat().st_size,
 									"extension":asset_file.suffix
+								},
+								"file_handle":{
+									"local_path":asset_file.name,
+									"behavior":"single_active"
 								},
 								"format.obj":{
 									"up_axis": "+y",

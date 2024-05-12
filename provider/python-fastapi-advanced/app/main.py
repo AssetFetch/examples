@@ -184,8 +184,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				obj_path = pathlib.Path(obj_path)
 				obj_component = implementations.AssetImplementationComponent(obj_path.name,[
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,True),
-					datablocks.unlock_link_block_from_path(obj_path),
-					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,obj_path),
+					datablocks.file_info_block_from_path(obj_path),
+					datablocks.file_handle_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.SINGLE_ACTIVE)
 				])
 				obj_mtl_implementation.components.append(obj_component)
 
@@ -194,8 +195,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for mtl_path in mtl_files:
 				mtl_path = pathlib.Path(mtl_path)
 				mtl_component = implementations.AssetImplementationComponent(mtl_path.name,[
-					datablocks.unlock_link_block_from_path(mtl_path),
-					datablocks.file_info_block_from_path(mtl_path,mtl_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,mtl_path),
+					datablocks.file_info_block_from_path(mtl_path),
+					datablocks.file_handle_block_from_path(mtl_path,mtl_path.name,datablocks.BehaviorStyle.SINGLE_PASSIVE)
 				])
 				obj_mtl_implementation.components.append(mtl_component)
 
@@ -205,8 +207,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				jpg_path = pathlib.Path(jpg_path)
 
 				map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-					datablocks.unlock_link_block_from_path(jpg_path),
-					datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,jpg_path),
+					datablocks.file_info_block_from_path(jpg_path),
+					datablocks.file_handle_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.SINGLE_PASSIVE)
 				])
 				obj_mtl_implementation.components.append(map_component)
 
@@ -223,8 +226,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				obj_path = pathlib.Path(obj_path)
 				obj_component = implementations.AssetImplementationComponent(obj_path.name,[
 					datablocks.ObjFormatBlock(datablocks.ObjUpAxis.PLUS_Y,False),
-					datablocks.unlock_link_block_from_path(obj_path),
-					datablocks.file_info_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.FILE_ACTIVE),
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,obj_path),
+					datablocks.file_info_block_from_path(obj_path),
+					datablocks.file_handle_block_from_path(obj_path,obj_path.name,datablocks.BehaviorStyle.SINGLE_ACTIVE),
 					datablocks.LooseMaterialApplyBlock([datablocks.LooseMaterialApplyElement(asset_id,None)])
 				])
 				obj_loose_material_implementation.components.append(obj_component)
@@ -250,9 +254,10 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 				if map:
 					map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-						datablocks.unlock_link_block_from_path(jpg_path),
+						datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,jpg_path),
 						datablocks.LooseMaterialDefineBlock(asset_id,map,colorspace),
-						datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
+						datablocks.file_info_block_from_path(jpg_path),
+						datablocks.file_handle_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.SINGLE_PASSIVE)
 					])
 					obj_loose_material_implementation.components.append(map_component)
 
@@ -270,8 +275,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
-					datablocks.unlock_link_block_from_path(usd_path),
-					datablocks.file_info_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,usd_path),
+					datablocks.file_info_block_from_path(usd_path),
+					datablocks.file_handle_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.SINGLE_ACTIVE)
 				])
 				usd_implementation.components.append(usd_component)
 			
@@ -281,8 +287,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				jpg_path = pathlib.Path(jpg_path)
 
 				map_component = implementations.AssetImplementationComponent(jpg_path.name,[
-					datablocks.unlock_link_block_from_path(jpg_path),
-					datablocks.file_info_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,jpg_path),
+					datablocks.file_handle_block_from_path(jpg_path,jpg_path.name,datablocks.BehaviorStyle.SINGLE_PASSIVE),
+					datablocks.file_info_block_from_path(jpg_path)
 				])
 				usd_implementation.components.append(map_component)
 
@@ -335,9 +342,10 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 
 				if map:
 					map_component = implementations.AssetImplementationComponent(map_path.name,[
-						datablocks.unlock_link_block_from_path(map_path),
+						datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,map_path),
 						datablocks.LooseMaterialDefineBlock(asset_id,map,colorspace),
-						datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
+						datablocks.file_info_block_from_path(map_path),
+						datablocks.file_handle_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.SINGLE_ACTIVE)
 					])
 					mat_loose_material_implementation.components.append(map_component)
 
@@ -354,8 +362,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for usd_path in usd_files:
 				usd_path = pathlib.Path(usd_path)
 				usd_component = implementations.AssetImplementationComponent(usd_path.name,[
-					datablocks.unlock_link_block_from_path(usd_path),
-					datablocks.file_info_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,usd_path),
+					datablocks.file_info_block_from_path(usd_path),
+					datablocks.file_handle_block_from_path(usd_path,usd_path.name,datablocks.BehaviorStyle.SINGLE_ACTIVE)
 				])
 				usd_implementation.components.append(usd_component)
 
@@ -363,8 +372,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				map_path = pathlib.Path(map_path)
 
 				map_component = implementations.AssetImplementationComponent(map_path.name,[
-					datablocks.unlock_link_block_from_path(map_path),
-					datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,map_path),
+					datablocks.file_info_block_from_path(map_path),
+					datablocks.file_handle_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.SINGLE_PASSIVE)
 				])
 				usd_implementation.components.append(map_component)
 
@@ -379,8 +389,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 			for mtlx_path in mtlx_files:
 				mtlx_path = pathlib.Path(mtlx_path)
 				mtlx_component = implementations.AssetImplementationComponent(mtlx_path.name,[
-					datablocks.unlock_link_block_from_path(mtlx_path),
-					datablocks.file_info_block_from_path(mtlx_path,mtlx_path.name,datablocks.BehaviorStyle.FILE_ACTIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,mtlx_path),
+					datablocks.file_info_block_from_path(mtlx_path),
+					datablocks.file_handle_block_from_path(mtlx_path,mtlx_path.name,datablocks.BehaviorStyle.SINGLE_ACTIVE)
 				])
 				mtlx_implementation.components.append(mtlx_component)
 
@@ -388,8 +399,9 @@ def endpoint_implementation_list(asset_id:str,request:Request,response:Response,
 				map_path = pathlib.Path(map_path)
 
 				map_component = implementations.AssetImplementationComponent(map_path.name,[
-					datablocks.unlock_link_block_from_path(map_path),
-					datablocks.file_info_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.FILE_PASSIVE)
+					datablocks.file_fetch_download_post_unlock_block_from_path(implementation_prefix,map_path),
+					datablocks.file_info_block_from_path(map_path),
+					datablocks.file_handle_block_from_path(map_path,map_path.name,datablocks.BehaviorStyle.SINGLE_PASSIVE)
 				])
 				mtlx_implementation.components.append(map_component)
 

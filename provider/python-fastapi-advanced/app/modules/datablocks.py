@@ -115,37 +115,24 @@ class FileFetchDownloadBlock(Datablock,templates.FixedQuery):
 		super().__init__(uri, method, payload)
 
 class BehaviorStyle(StrEnum):
-	FILE_ACTIVE="file_active"
-	FILE_PASSIVE="file_passive"
-	ARCHIVE="archive"
+	SINGLE_ACTIVE="single_active"
+	SINGLE_PASSIVE="single_passive"
+	# Other behaviors don't appear in this provider
+	
 class FileInfoBlock(Datablock):
 	block_name = "file_info"
-	def __init__(self,local_path:str,length:int,extension:str,behavior:BehaviorStyle) -> None:
+	def __init__(self,length:int,extension:str) -> None:
 		super().__init__()
-		self.local_path = local_path
 		self.length = length
 		self.extension = extension
+		
+
+class FileHandleBlock(Datablock):
+	block_name="file_handle"
+	def __init__(self,local_path:str,behavior:BehaviorStyle) -> None:
+		super().__init__()
 		self.behavior = behavior
-
-def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDownloadBlock :
-		relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
-
-		return FileFetchDownloadBlock(
-			f"{config.API_URL}/asset_file/{relative_to_asset_dir}",
-			templates.HttpMethod.GET,
-			{}
-		)
-
-def file_info_block_from_path(file_path : pathlib.Path,local_path:str,behavior:BehaviorStyle) -> FileInfoBlock:
-	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
-
-	return FileInfoBlock(
-		local_path=local_path,
-		length=os.stat(file_path).st_size,
-		extension="".join(file_path.suffixes),
-		behavior=behavior
-	)
-
+		self.local_path = local_path
 
 class LooseMaterialMapName(StrEnum):
 	albedo = "albedo"
@@ -171,7 +158,7 @@ class LooseMaterialApplyElement:
 		self.apply_selectively_to : str|None = apply_selectively_to
 
 class LooseMaterialDefineBlock(Datablock):
-	block_name="loose_material_define"
+	block_name="loose_material.define"
 	def __init__(self,material_name:str,map:LooseMaterialMapName,colorspace:LooseMaterialColorSpace) -> None:
 		super().__init__()
 		self.material_name :str = material_name
@@ -179,7 +166,7 @@ class LooseMaterialDefineBlock(Datablock):
 		self.colorspace : LooseMaterialColorSpace = colorspace
 
 class LooseMaterialApplyBlock(Datablock,List[LooseMaterialApplyElement]):
-	block_name="loose_material_apply"
+	block_name="loose_material.apply"
 	def __init__(self,elements : List[LooseMaterialApplyElement]) -> None:
 		super().__init__()
 		for e in elements:
@@ -208,23 +195,6 @@ class UnlockBalanceBlock(Datablock):
 		self.balance = balance
 		self.balance_unit = balance_unit
 		self.balance_refill_uri = balance_refill_uri
-
-class UnlockLinkBlock(Datablock):
-	block_name="unlock_link"
-	def __init__(self,unlock_query_id:str,unlocked_datablocks_query:templates.FixedQuery):
-		self.unlock_query_id = unlock_query_id
-		self.unlocked_datablocks_query = unlocked_datablocks_query
-
-def unlock_link_block_from_path(file_path:pathlib.Path) -> UnlockLinkBlock:
-	return UnlockLinkBlock(file_path.parent.name,templates.FixedQuery(
-		f"{config.API_URL}/unlocked_datablocks",
-		templates.HttpMethod.GET,
-		{
-			"asset_id":file_path.parent.parent.name,
-			"implementation_prefix":file_path.parent.name,
-			"file_name":file_path.name
-		}
-	))
 
 class UnlockQuery:
 	def __init__(self,id:str,unlocked:bool,price:int,unlock_query:templates.FixedQuery,unlock_query_fallback_uri:str) -> None:
@@ -256,3 +226,51 @@ def unlock_queries_block_from_directory(directory_path : pathlib.Path,user:users
 			)
 		)
 	return unlock_queries_block
+
+class FileFetchDownloadPostUnlockBlock(Datablock):
+	block_name = "file_fetch.download_post_unlock"
+	def __init__(self,unlock_query_id:str, unlocked_data_query) -> None:
+		super().__init__()
+		self.unlock_query_id = unlock_query_id
+		self.unlocked_data_query = unlocked_data_query
+
+def file_fetch_download_post_unlock_block_from_path(unlock_query_id:str,file_path : pathlib.Path) -> FileFetchDownloadPostUnlockBlock :
+	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+	return FileFetchDownloadPostUnlockBlock(
+		unlock_query_id,
+		templates.FixedQuery(
+			f"{config.API_URL}/unlocked_datablocks",
+			templates.HttpMethod.GET,
+			{
+				"asset_id":file_path.parent.parent.name,
+				"implementation_prefix":file_path.parent.name,
+				"file_name":file_path.name
+			}
+		)
+	)
+
+def file_fetch_download_block_from_path(file_path : pathlib.Path) -> FileFetchDownloadPostUnlockBlock :
+	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+	return FileFetchDownloadBlock(
+		f"{config.API_URL}/asset_file/{relative_to_asset_dir}",
+		templates.HttpMethod.GET,
+		{}
+	)
+
+def file_info_block_from_path(file_path : pathlib.Path) -> FileInfoBlock:
+	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+	return FileInfoBlock(
+		length=os.stat(file_path).st_size,
+		extension="".join(file_path.suffixes),
+	)
+
+def file_handle_block_from_path(file_path : pathlib.Path,local_path:str,behavior:BehaviorStyle) -> FileHandleBlock:
+	relative_to_asset_dir : str = file_path.relative_to(config.ASSET_DIRECTORY)
+
+	return FileHandleBlock(
+		local_path=local_path,
+		behavior=behavior
+	)
