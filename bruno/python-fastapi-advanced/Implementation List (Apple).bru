@@ -1,0 +1,20 @@
+meta {
+  name: Implementation List (Apple)
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8001/implementation_list/apple?resolution=2&lod=low
+  body: none
+  auth: none
+}
+
+params:query {
+  resolution: 2
+  lod: low
+}
+
+headers {
+  access-token: debug
+}

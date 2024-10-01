@@ -1,0 +1,20 @@
+meta {
+  name: Implementation List (Paving Stones)
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8001/implementation_list/paving_stones?resolution=1&format=jpg
+  body: none
+  auth: none
+}
+
+params:query {
+  resolution: 1
+  format: jpg
+}
+
+headers {
+  access-token: debug
+}
