@@ -14,7 +14,7 @@ class EndpointKind(StrEnum):
 
 
 class MetaField:
-	def __init__(self,kind : EndpointKind,message : str = "OK",version : str = "0.3") -> None:
+	def __init__(self,kind : EndpointKind,message : str = "OK",version : str = "0.4") -> None:
 		self.kind :EndpointKind = kind
 		self.message :str = message
 		self.version :str = version
@@ -37,14 +37,12 @@ class HttpParameterChoice:
 		self.value = value
 
 class HttpParameter:
-	def __init__(self, type : HttpParameterType, id : str, title : str, default : str = "", mandatory : bool = False, delimiter : str=',',choices : List[HttpParameterChoice]|None = None,):
+	def __init__(self, type : HttpParameterType, id : str, title : str, default : str = "",choices : List[HttpParameterChoice]|None = None,):
 		self.type = type
 		self.id = id
 		self.title = title
 		self.default = default
-		self.mandatory = mandatory
 		self.choices = choices
-		self.delimiter = delimiter
 
 class FixedQuery:
 	def __init__(self,uri : str, method : HttpMethod, payload : Dict[str,str] ) -> None:

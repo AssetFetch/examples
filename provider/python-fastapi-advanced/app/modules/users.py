@@ -38,5 +38,5 @@ def create_if_not_existing(username:str):
 		DEMO_USERS[username] = AssetFetchUser(username)
 	
 # Create user 'debug' with access-token 'debug'.
-DEMO_USERS["debug"] = AssetFetchUser("debug",1000)
+DEMO_USERS["debug"] = AssetFetchUser("debug",10)
 DEMO_USERS["debug"].token_sha512 = "225d05b918519458a8fcc1e6493a4e854c004da76f6250b8f52197f47094f71ee984725c31446a1967f0d55f4dc74793dd44d932f2bdf50d77d4288d663bf1ab"
