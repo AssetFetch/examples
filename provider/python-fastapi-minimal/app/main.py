@@ -42,7 +42,7 @@ def endpoint_initialization():
 		"meta":{
 			"kind": "initialization",
 			"message":"OK",
-			"version":"0.2-dev"
+			"version":"0.4"
 		},
 		"id":"minimal.example.assetfetch.org",
 		"data":{
@@ -99,7 +99,7 @@ def endpoint_asset_list():
 		"meta":{
 			"kind": "asset_list",
 			"message":"OK",
-			"version":"0.2-dev"
+			"version":"0.4"
 		},
 		"data":{},
 		"assets": assets
@@ -122,7 +122,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 			"meta":{
 				"kind": "implementation_list",
 				"message":"OK",
-				"version":"0.2-dev"
+				"version":"0.4"
 			},
 			"data":{},
 			# There is only one implementation with one file, so we just define it right here
@@ -139,23 +139,21 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 						{
 							"id":asset_file.name,
 							"data":{
-								"file_fetch.download":{
-									"uri": f"{API_URL}/static/{asset_file.name}",
-									"method": "get",
-									"payload": {}
+								"fetch.download":{
+									"download_query":{
+										"uri": f"{API_URL}/static/{asset_file.name}",
+										"method": "get",
+										"payload": {}
+									}
 								},
-								"file_info":{
-									"length":asset_file.stat().st_size,
-									"extension":asset_file.suffix
-								},
-								"file_handle":{
-									"local_path":asset_file.name,
-									"behavior":"single_active"
+								"store":{
+									"local_file_path":asset_file.name,
+									"bytes":asset_file.stat().st_size
 								},
 								"format.obj":{
-									"up_axis": "+y",
-									"use_mtl": False
-								}
+									"up_axis": "+y"
+								},
+								"handle.native":{}
 							}
 						}
 					]
@@ -167,7 +165,7 @@ def endpoint_implementation_list(asset_name:str,response:Response):
 			"meta":{
 				"kind": "implementation_list",
 				"message":"The requested asset could not be found.",
-				"version":"0.2-dev"
+				"version":"0.4"
 			}
 		}
 		response.status_code = status.HTTP_404_NOT_FOUND
