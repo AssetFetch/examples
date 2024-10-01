@@ -1,0 +1,20 @@
+meta {
+  name: Unlock Red Apple (2K LQ)
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8001/unlock?asset_id=apple&implementation_prefix=lod-low_tex-2k
+  body: none
+  auth: none
+}
+
+params:query {
+  asset_id: apple
+  implementation_prefix: lod-low_tex-2k
+}
+
+headers {
+  access-token: debug
+}
